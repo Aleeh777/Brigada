@@ -1363,7 +1363,17 @@ input,select,textarea{font-family:var(--ui)}
           </div>
         </div>
       </div>
-      <div id="sh-fotos" style="display:none"><div class="fotgrid" id="sh-fgrid"></div></div>
+      <div id="sh-fotos" style="display:none">
+        <!-- Botón agregar foto al registro existente -->
+        <div style="padding:10px 0 8px;">
+          <label for="sh-foto-inp" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.3);border-radius:5px;padding:9px 16px;">
+            <input type="file" id="sh-foto-inp" accept="image/*" multiple style="display:none" onchange="agregarFotoSheet(this)">
+            <span style="font-size:18px;">&#128247;</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#00c8ff;letter-spacing:.1em;">AGREGAR FOTO</span>
+          </label>
+        </div>
+        <div class="fotgrid" id="sh-fgrid"></div>
+      </div>
       <div id="sh-hist" style="display:none;padding:2px 0"></div>
     </div>
     <div class="shfoot">
@@ -1795,9 +1805,7 @@ function openSheet(id){
       +'<div class="dval'+(cls.includes('dr')?' dr':cls.includes('dg')?' dg':cls.includes('da')?' da':cls.includes('dp')?' dp':'')+'">'+c[1]+'</div></div>';
   }).join('');
   /* Fotos grid */
-  document.getElementById('sh-fgrid').innerHTML=fo.length
-    ?fo.map(function(s){return'<div class="fgi" onclick="verFoto(\''+s+'\')"><img src="'+s+'" loading="lazy" alt=""></div>';}).join('')
-    :'<div class="vacio" style="padding:clamp(24px,6vw,40px)"><div class="vacio-ico">&#128247;</div><div class="vacio-txt">Sin fotografias registradas.</div></div>';
+  renderSheetFotos(id);
   /* Historial */
   var h=r.hist||[];
   document.getElementById('sh-hist').innerHTML=h.length
@@ -2153,6 +2161,65 @@ function compImg(src,maxW,q,cb){
     cb(cv.toDataURL('image/jpeg',q));
   };
   img.src=src;
+}
+function agregarFotoSheet(input){
+  if(!CID){toast('Sin registro activo','err');return;}
+  Array.from(input.files).forEach(function(f){
+    var rd=new FileReader();
+    rd.onload=function(e){
+      compImg(e.target.result,900,.75,function(c){
+        if(!FT[CID])FT[CID]=[];
+        FT[CID].push(c);
+        ftSave();
+        // Actualizar grid de fotos en el sheet
+        var fg=document.getElementById('sh-fgrid');
+        if(fg) renderSheetFotos(CID);
+        // Sincronizar con servidor
+        var r=DB.find(function(x){return x.id===CID;});
+        if(r&&SC&&ONLINE) SB.update('registros',CID,{fotos:JSON.stringify(FT[CID])}).then(function(){marcarCambio();});
+        toast('Foto agregada','ok');
+      });
+    };
+    rd.readAsDataURL(f);
+  });
+  input.value='';
+}
+function renderSheetFotos(id){
+  var fo=FT[id]||[];
+  var fg=document.getElementById('sh-fgrid');
+  if(!fg)return;
+  fg.innerHTML='';
+  if(!fo.length){
+    fg.innerHTML='<div class="vacio" style="padding:clamp(24px,6vw,40px)"><div class="vacio-ico">&#128247;</div><div class="vacio-txt">Sin fotografias.</div></div>';
+    return;
+  }
+  fo.forEach(function(s,i){
+    var wrap=document.createElement('div');
+    wrap.className='fgi';
+    wrap.style.position='relative';
+    var img=document.createElement('img');
+    img.src=s; img.loading='lazy'; img.alt='';
+    img.style.cssText='width:100%;height:100%;object-fit:cover;cursor:pointer;display:block;';
+    img.onclick=function(){verFoto(s);};
+    var del=document.createElement('button');
+    del.innerHTML='&#10005;';
+    del.style.cssText='position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;background:rgba(200,20,30,.88);border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;';
+    (function(idx){del.onclick=function(e){e.stopPropagation();borrarFotoSheet(idx);};})(i);
+    wrap.appendChild(img); wrap.appendChild(del);
+    fg.appendChild(wrap);
+  });
+}
+function borrarFotoSheet(idx){
+  if(!CID)return;
+  if(!confirm('Eliminar esta foto?'))return;
+  if(!FT[CID])return;
+  FT[CID].splice(idx,1);
+  ftSave();
+  renderSheetFotos(CID);
+  // Sincronizar
+  var r=DB.find(function(x){return x.id===CID;});
+  if(r&&SC&&ONLINE) SB.update('registros',CID,{fotos:JSON.stringify(FT[CID])}).then(function(){marcarCambio();});
+  toast('Foto eliminada','ok');
 }
 function renderPrev(){
   document.getElementById('fotos-row').innerHTML=TMP.map(function(s,i){
