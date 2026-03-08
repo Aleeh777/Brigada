@@ -2665,59 +2665,65 @@ function mkWCard(r){
   var wrap=document.createElement('div');
   wrap.setAttribute('data-cat',cat);
   wrap.setAttribute('data-id',String(r.id));
-  // Polaroid card — position absolute, centrada por JS
+  // Polaroid — position absolute centrada por JS
+  // Fondo oscuro igual que la app
   wrap.style.cssText=[
     'position:absolute',
     'left:50%',
     'top:0',
     'transform-origin:bottom center',
-    'background:#fff',
-    'border-radius:3px',
-    'box-shadow:0 8px 32px rgba(0,0,0,.55)',
+    'background:#0d1525',
+    'border-radius:4px',
+    'box-shadow:0 10px 40px rgba(0,0,0,.75),0 2px 8px rgba(0,0,0,.5)',
+    'border:1px solid rgba(0,200,255,.12)',
     'cursor:pointer',
     'user-select:none',
     '-webkit-user-select:none',
     'transition:transform .45s cubic-bezier(.4,0,.2,1),opacity .35s ease,filter .35s ease',
-    'padding:8px 8px 0 8px'
+    'overflow:hidden'
   ].join(';');
 
+  // Badge categoría — franja superior de color
+  var badge=document.createElement('div');
+  badge.style.cssText='text-align:center;padding:5px 8px 4px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:'+BC[cat]+';background:rgba(0,0,0,.3);border-bottom:1px solid '+BC[cat]+'44;';
+  badge.textContent=BL[cat];
+  wrap.appendChild(badge);
+
   // Foto
-  var fotoEl=document.createElement('div');
-  fotoEl.style.cssText='width:100%;background:#111;overflow:hidden;position:relative;';
+  var fotoWrap=document.createElement('div');
+  fotoWrap.style.cssText='width:100%;position:relative;overflow:hidden;background:#070d1a;';
+  fotoWrap.onclick=function(){CID=r.id;openSheet(r.id);};
   if(fo.length){
     var img=document.createElement('img');
     img.src=fo[0];
     img.style.cssText='width:100%;height:100%;object-fit:cover;object-position:top center;display:block;';
-    fotoEl.appendChild(img);
+    fotoWrap.appendChild(img);
   } else {
-    fotoEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:48px;opacity:.15;color:#333;">&#128100;</div>';
+    fotoWrap.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:48px;opacity:.1;color:#fff;">&#128100;</div>';
   }
-  fotoEl.onclick=function(){CID=r.id;openSheet(r.id);};
-  wrap.appendChild(fotoEl);
+  wrap.appendChild(fotoWrap);
 
-  // Franja blanca inferior (estilo Polaroid)
+  // Datos — parte inferior oscura (dentro del marco Polaroid)
   var info=document.createElement('div');
   info.className='wc-info';
-  info.style.cssText='padding:6px 4px 8px;display:none;';
+  info.style.cssText='display:none;padding:8px 10px 6px;background:#0d1525;';
   info.innerHTML=
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 6px;">'+
-      '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:#999;letter-spacing:.08em;text-transform:uppercase;">NOMBRE</div>'+
-          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;color:#111;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+nom+'</div></div>'+
-      '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:#999;letter-spacing:.08em;text-transform:uppercase;">DNI</div>'+
-          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;color:#111;">'+dni+'</div></div>'+
-      '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:#999;letter-spacing:.08em;text-transform:uppercase;">DELITO</div>'+
-          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;color:'+BC[cat]+';text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+del2+'</div></div>'+
-      '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:#999;letter-spacing:.08em;text-transform:uppercase;">DOMICILIO</div>'+
-          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:11px;color:#222;white-space:normal;line-height:1.3;word-break:break-word;">'+dom+'</div></div>'+
-    '</div>'+
-    // Badge categoría
-    '<div style="margin-top:5px;text-align:center;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:11px;letter-spacing:.2em;color:'+BC[cat]+';">'+BL[cat]+'</div>';
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;">'+
+      '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">NOMBRE</div>'+
+          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:#fff;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+nom+'</div></div>'+
+      '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DNI</div>'+
+          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:#fff;">'+dni+'</div></div>'+
+      '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DELITO</div>'+
+          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:'+BC[cat]+';text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+del2+'</div></div>'+
+      '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DOMICILIO</div>'+
+          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:11px;color:#cde;white-space:normal;line-height:1.3;word-break:break-word;">'+dom+'</div></div>'+
+    '</div>';
   wrap.appendChild(info);
 
-  // Botón editar
+  // Botón editar — dentro del marco, fondo oscuro
   var btn=document.createElement('button');
   btn.textContent='EDITAR';
-  btn.style.cssText='display:none;width:100%;margin:5px 0 4px;background:'+BC[cat]+';border:none;color:#fff;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:6px 4px;cursor:pointer;border-radius:2px;';
+  btn.style.cssText='display:none;width:100%;background:rgba(0,200,255,.1);border:none;border-top:1px solid rgba(0,200,255,.2);color:#00c8ff;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;letter-spacing:.18em;text-transform:uppercase;padding:8px 4px;cursor:pointer;';
   btn.onclick=function(e){e.stopPropagation();CID=r.id;editar();};
   wrap.appendChild(btn);
 
@@ -2730,59 +2736,54 @@ function _layoutCards(){
   var cards=Array.from(outer.querySelectorAll('[data-cat]'));
   var n=cards.length; if(!n)return;
   var outerW=outer.offsetWidth;
-  // Ancho de la card activa
-  var W=Math.min(outerW*0.68, 260);
-  // Altura foto: proporción 3:4
-  var H=Math.round(W*1.1);
+  var W=Math.min(Math.round(outerW*0.68), 260);
+  var H=Math.round(W*1.28); // altura foto 4:3 aprox
 
   cards.forEach(function(c,i){
     var diff=i-_carIdx;
-    // Circular
-    if(diff > n/2) diff -= n;
-    if(diff < -n/2) diff += n;
+    if(diff > n/2) diff-=n;
+    if(diff < -n/2) diff+=n;
     var absDiff=Math.abs(diff);
 
-    // Foto height
-    var fotoEl=c.querySelector('div');
-    if(fotoEl) fotoEl.style.height=H+'px';
+    // Ajustar altura de la foto
+    var fotoWrap=c.querySelectorAll('div')[1]; // segundo div = foto
+    if(fotoWrap) fotoWrap.style.height=H+'px';
 
     c.style.width=W+'px';
-    c.style.marginLeft=(-W/2)+'px'; // centrar en left:50%
+    c.style.marginLeft=(-W/2)+'px';
+
+    var info=c.querySelector('.wc-info');
+    var btn=c.querySelector('button');
 
     if(absDiff===0){
-      // Card activa — frontal, centrada
       c.style.transform='translateX(0) scale(1) rotate(0deg)';
       c.style.zIndex='10';
       c.style.opacity='1';
       c.style.filter='none';
       c.style.pointerEvents='auto';
-      var info=c.querySelector('.wc-info'), btn=c.querySelector('button');
       if(info) info.style.display='block';
       if(btn)  btn.style.display='block';
     } else if(absDiff===1){
-      // Cards laterales — detrás, rotadas
       var sign=diff>0?1:-1;
-      c.style.transform='translateX('+sign*Math.round(W*0.28)+'px) scale(.82) rotate('+sign*6+'deg)';
+      c.style.transform='translateX('+sign*Math.round(W*0.3)+'px) scale(.8) rotate('+sign*7+'deg)';
       c.style.zIndex='5';
-      c.style.opacity='.6';
-      c.style.filter='brightness(.7)';
+      c.style.opacity='.5';
+      c.style.filter='brightness(.5)';
       c.style.pointerEvents='none';
-      var info=c.querySelector('.wc-info'), btn=c.querySelector('button');
       if(info) info.style.display='none';
       if(btn)  btn.style.display='none';
     } else {
       c.style.opacity='0';
       c.style.zIndex='1';
       c.style.pointerEvents='none';
-      var info=c.querySelector('.wc-info'), btn=c.querySelector('button');
       if(info) info.style.display='none';
       if(btn)  btn.style.display='none';
     }
   });
 
-  // Ajustar altura del outer a la card activa
-  // El outer solo necesita contener la foto (H) + franja polaroid inferior
-  outer.style.height=(H+8)+'px'; // solo la foto, los datos van fuera del outer
+  // Altura del outer = foto + badge + datos + botón
+  var totalH = H + 28 + 90 + 38; // badge+foto+info+btn
+  outer.style.height=totalH+'px';
 }
 
 function renderCarousel(data){
@@ -2807,11 +2808,9 @@ function renderCarousel(data){
   });
 
   _carIdx=0;
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){
-      _layoutCards();
-    });
-  });
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    _layoutCards();
+  });});
   _initSwipe(outer);
 }
 
