@@ -1109,7 +1109,7 @@ input,select,textarea{font-family:var(--ui)}
         <!-- Barra de búsqueda -->
         <div class="sbar" style="margin-bottom:10px;">
           <span class="sico">&#9906;</span>
-          <input id="q" type="search" placeholder="DNI, nombre o apodo..." oninput="(function(){var p=document.getElementById('panel-busqueda');if(p&&this.value){p.style.display='flex';p.style.flexDirection='column';}buscar();}).call(this)" autocomplete="off" spellcheck="false">
+          <input id="q" type="search" placeholder="DNI, nombre o apodo..." oninput="mostrarLista();buscar()" autocomplete="off" spellcheck="false">
           <button class="sx" id="btn-clear" onclick="limpQ()" style="display:none">X</button>
         </div>
 
@@ -1496,14 +1496,20 @@ function updateStats(){
 }
 
 /* BUSQUEDA */
+function mostrarLista(){
+  var p=document.getElementById('panel-busqueda');
+  if(p){ p.style.display='flex'; p.style.flexDirection='column'; }
+}
 function abrirLista(cat){
   FIL=cat;
-  document.querySelectorAll('.ff').forEach(function(b){b.classList.toggle('act',b.dataset.f===cat);});
-  var p=document.getElementById('panel-busqueda');
-  if(p){p.style.display='flex';p.style.flexDirection='column';}
+  document.querySelectorAll('.ff').forEach(function(b){
+    b.classList.toggle('act', b.dataset.f===cat);
+  });
+  mostrarLista();
   buscar();
 }
 function cerrarLista(){
+  FIL='';
   var p=document.getElementById('panel-busqueda');
   if(p) p.style.display='none';
 }
@@ -1520,6 +1526,7 @@ function buscar(){
     if(!q)return true;
     return(r.dni||'').includes(q)||(r.nombre||'').toLowerCase().includes(q)||(r.alias||'').toLowerCase().includes(q)||(r.delito||'').toLowerCase().includes(q);
   });
+  mostrarLista();
   var c=document.getElementById('lista');
   if(!rows.length&&!q&&!FIL){
     c.innerHTML='<div class="vacio"><div class="vacio-ico">&#9203;</div><div class="vacio-txt">Conectando al servidor...<br>Presione SYNC para cargar los datos.</div></div>';
