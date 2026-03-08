@@ -1061,15 +1061,15 @@ input,select,textarea{font-family:var(--ui)}
   <div class="mscroll" id="mscroll">
 
     <!-- BUSCAR -->
-    <div id="pb" style="display:flex;flex-direction:column;height:100%;overflow-y:auto;overflow-x:hidden;">
+    <div id="pb" style="width:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;">
 
       <!-- ENCABEZADO -->
-      <div style="flex-shrink:0;padding:6px 14px 0;">
+      <div style="padding:8px 14px 0;">
         <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#00c8ff;letter-spacing:.15em;text-transform:uppercase;opacity:.45;">&#9632; REGISTRO ACTIVO &bull; DIV. DELITOS TELEMATICOS &bull; TUCUMAN</div>
       </div>
 
-      <!-- BUSCADOR — compacto, justo debajo del encabezado -->
-      <div style="flex-shrink:0;padding:6px 14px 0;">
+      <!-- BUSCADOR -->
+      <div style="padding:8px 14px 0;">
         <div style="display:flex;gap:6px;align-items:center;background:#0a1220;border:1px solid rgba(0,200,255,.28);border-radius:5px;padding:3px 8px 3px 10px;">
           <span style="color:rgba(0,200,255,.45);font-size:13px;">&#9906;</span>
           <input id="q" type="search" placeholder="Nombre, DNI o apodo..."
@@ -1081,41 +1081,221 @@ input,select,textarea{font-family:var(--ui)}
           <button onclick="buscarEnCarrusel(document.getElementById('q').value)"
             style="background:rgba(0,200,255,.14);border:1px solid rgba(0,200,255,.35);color:#00c8ff;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.12em;padding:6px 10px;cursor:pointer;border-radius:3px;flex-shrink:0;">IR</button>
         </div>
-        <div id="q-resultado" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(0,200,255,.5);padding:3px 2px;min-height:14px;letter-spacing:.08em;"></div>
+        <div id="q-resultado" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(0,200,255,.5);padding:2px 2px 0;min-height:13px;letter-spacing:.08em;"></div>
       </div>
 
-      <!-- CARRUSEL — ocupa el espacio restante -->
-      <div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;padding:4px 0 0;">
-        <div id="carousel-outer" style="position:relative;width:100%;overflow:hidden;"></div>
-        <div style="display:flex;justify-content:center;align-items:center;gap:14px;padding:8px 0 4px;">
+      <!-- CARRUSEL -->
+      <div style="padding:6px 0 0;position:relative;">
+        <div id="carousel-outer" style="width:100%;overflow:hidden;position:relative;"></div>
+        <div style="display:flex;justify-content:center;align-items:center;gap:14px;padding:8px 0 6px;">
           <button onclick="carMove(-1)" style="width:38px;height:38px;border-radius:50%;background:rgba(5,10,18,.92);border:1.5px solid rgba(0,200,255,.4);color:#00c8ff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background='rgba(0,200,255,.15)'" onmouseout="this.style.background='rgba(5,10,18,.92)'">&#8249;</button>
           <div id="car-dots" style="display:flex;gap:5px;align-items:center;"></div>
           <button onclick="carMove(1)" style="width:38px;height:38px;border-radius:50%;background:rgba(5,10,18,.92);border:1.5px solid rgba(0,200,255,.4);color:#00c8ff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background='rgba(0,200,255,.15)'" onmouseout="this.style.background='rgba(5,10,18,.92)'">&#8250;</button>
         </div>
       </div>
 
-      <!-- 4 RECUADROS — fijos abajo del carrusel -->
-      <div style="flex-shrink:0;padding:4px 14px 6px;">
+      <!-- 4 RECUADROS -->
+      <div style="padding:4px 14px 80px;">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
-          <div onclick="abrirLista('PROFUGO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(204,14,34,.3);border-top:2px solid #cc0e22;border-radius:4px;padding:7px 4px 6px;text-align:center;">
-            <div id="sp" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,26px);color:#cc0e22;line-height:1;">0</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(204,14,34,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;">PROFUGOS</div>
+          <div onclick="abrirLista('PROFUGO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(204,14,34,.3);border-top:2px solid #cc0e22;border-radius:4px;padding:10px 4px 8px;text-align:center;">
+            <div id="sp" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,28px);color:#cc0e22;line-height:1;">0</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(204,14,34,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;">PROFUGOS</div>
           </div>
-          <div onclick="abrirLista('CAPTURA')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(224,112,0,.3);border-top:2px solid #e07000;border-radius:4px;padding:7px 4px 6px;text-align:center;">
-            <div id="sc" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,26px);color:#e07000;line-height:1;">0</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(224,112,0,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;">PEDIDOS</div>
+          <div onclick="abrirLista('CAPTURA')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(224,112,0,.3);border-top:2px solid #e07000;border-radius:4px;padding:10px 4px 8px;text-align:center;">
+            <div id="sc" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,28px);color:#e07000;line-height:1;">0</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(224,112,0,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;">PEDIDOS</div>
           </div>
-          <div onclick="abrirLista('DETENIDO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(5,150,105,.3);border-top:2px solid #059669;border-radius:4px;padding:7px 4px 6px;text-align:center;">
-            <div id="sd" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,26px);color:#059669;line-height:1;">0</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(5,150,105,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;">DETENIDOS</div>
+          <div onclick="abrirLista('DETENIDO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(5,150,105,.3);border-top:2px solid #059669;border-radius:4px;padding:10px 4px 8px;text-align:center;">
+            <div id="sd" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,28px);color:#059669;line-height:1;">0</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(5,150,105,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;">DETENIDOS</div>
           </div>
-          <div onclick="abrirLista('SINPEDIDO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(124,58,237,.3);border-top:2px solid #7c3aed;border-radius:4px;padding:7px 4px 6px;text-align:center;">
-            <div id="ss" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,26px);color:#7c3aed;line-height:1;">0</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(124,58,237,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;">SIN PEDIDO</div>
+          <div onclick="abrirLista('SINPEDIDO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(124,58,237,.3);border-top:2px solid #7c3aed;border-radius:4px;padding:10px 4px 8px;text-align:center;">
+            <div id="ss" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,28px);color:#7c3aed;line-height:1;">0</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(124,58,237,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;">SIN PEDIDO</div>
           </div>
         </div>
       </div>
 
+    </div>
+
+
+    <div class="pant" id="pant-cargar">
+      <div class="ptit">Nuevo Registro</div>
+      <div class="panel">
+        <div class="phdr">01 &mdash; TIPO DE REGISTRO</div>
+        <div class="pbod">
+          <div class="tgrid">
+            <div class="topt tP" data-t="PROFUGO"   onclick="selTipo(this)"><span class="toi">&#9888;</span><div class="ton">Profugo</div><div class="tod">Pedido activo</div></div>
+            <div class="topt"    data-t="CAPTURA"   onclick="selTipo(this)"><span class="toi">&#128196;</span><div class="ton">Pedido</div><div class="tod">Orden judicial</div></div>
+            <div class="topt"    data-t="SINPEDIDO" onclick="selTipo(this)"><span class="toi">&#128100;</span><div class="ton">Sin Pedido</div><div class="tod">Fichado prev.</div></div>
+            <div class="topt"    data-t="DETENIDO"  onclick="selTipo(this)"><span class="toi">&#10003;</span><div class="ton">Detenido</div><div class="tod">En custodia</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="phdr">02 &mdash; FOTOGRAFIA</div>
+        <div class="pbod">
+          <label for="inp-foto" class="fdrop" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+            <input type="file" id="inp-foto" accept="image/*" capture="environment" multiple onchange="handleFotos(this)" style="display:none">
+            <span class="fdico">&#128247;</span>
+            <div class="fdtxt">Tocar para agregar foto<br><small style="opacity:.6;font-size:.85em">Camara o galeria</small></div>
+          </label>
+          <div class="frow" id="fotos-row"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="phdr">03 &mdash; DATOS PERSONALES</div>
+        <div class="pbod">
+          <div class="fg2">
+            <div class="fg"><label class="flbl">DNI *</label><input class="fi" id="f-dni" type="number" placeholder="Sin puntos" inputmode="numeric"></div>
+            <div class="fg"><label class="flbl">Fecha Nacimiento</label><input class="fi" id="f-fnac" placeholder="DD/MM/AAAA"></div>
+          </div>
+          <div class="fg"><label class="flbl">Apellido y Nombre *</label><input class="fi" id="f-nom" placeholder="APELLIDO, Nombre" oninput="this.value=this.value.toUpperCase()" autocapitalize="characters"></div>
+          <div class="fg"><label class="flbl">Apodo / Alias</label><input class="fi" id="f-ali" placeholder="Alias o apodo conocido"></div>
+          <div class="fg"><label class="flbl">Domicilio</label><input class="fi" id="f-dom" placeholder="Direccion, localidad"></div>
+          <div class="fg"><label class="flbl">Descripcion Fisica</label><textarea class="fta" id="f-des" placeholder="Altura, contextura, cabello, ojos, tatuajes..."></textarea></div>
+          <div class="fg"><label class="flbl">Vehiculo</label><input class="fi" id="f-veh" placeholder="Marca, modelo, dominio"></div>
+          <div class="fg"><label class="flbl">Familiares / Vinculos</label><input class="fi" id="f-fam" placeholder="Nombre, vinculo, domicilio"></div>
+        </div>
+      </div>
+      <div class="panel" id="sec-cau">
+        <div class="phdr">04 &mdash; CAUSA JUDICIAL</div>
+        <div class="pbod">
+          <div class="fg"><label class="flbl">Delito Imputado *</label><input class="fi" id="f-del" placeholder="Articulo y descripcion del delito"></div>
+          <div class="fg2">
+            <div class="fg"><label class="flbl">N de Causa</label><input class="fi" id="f-cau" placeholder="NNN/PRV/AAAA"></div>
+            <div class="fg"><label class="flbl">Provincia</label>
+              <select class="fs" id="f-pro">
+                <option value="">--</option><option>Buenos Aires</option><option>CABA</option><option>Catamarca</option><option>Chaco</option><option>Chubut</option><option>Cordoba</option><option>Corrientes</option><option>Entre Rios</option><option>Formosa</option><option>Jujuy</option><option>La Pampa</option><option>La Rioja</option><option>Mendoza</option><option>Misiones</option><option>Neuquen</option><option>Rio Negro</option><option>Salta</option><option>San Juan</option><option>San Luis</option><option>Santa Cruz</option><option>Santa Fe</option><option>Santiago del Estero</option><option>Tierra del Fuego</option><option selected>Tucuman</option><option>Federal</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg"><label class="flbl">Juzgado / Fiscalia</label><input class="fi" id="f-juz" placeholder="Organo emisor"></div>
+        </div>
+      </div>
+      <div class="panel" id="sec-mot" style="display:none">
+        <div class="phdr">04 &mdash; MOTIVO DE FICHADO</div>
+        <div class="pbod">
+          <div class="fg"><label class="flbl">Motivo *</label><textarea class="fta" id="f-mot" placeholder="Motivo de la demora o fichado preventivo..."></textarea></div>
+          <div class="fg"><label class="flbl">Lugar / Circunstancia</label><input class="fi" id="f-lug" placeholder="Donde y como ocurrio"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="phdr">05 &mdash; OBSERVACIONES Y RESPONSABLE</div>
+        <div class="pbod">
+          <div class="fg"><label class="flbl">Observaciones</label><textarea class="fta" id="f-obs" placeholder="Vinculos, alertas, informacion adicional..."></textarea></div>
+          <div class="fg"><label class="flbl">Agente que Carga *</label><input class="fi" id="f-age" placeholder="Nombre y rango del agente"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:clamp(7px,1.8vw,11px);padding-bottom:clamp(16px,4vw,24px)">
+        <button class="btn bs bsm" onclick="limpForm()">LIMPIAR</button>
+        <button class="btn bp bfw" id="btn-reg" onclick="pedirClaveReg()" style="flex:1">REGISTRAR</button>
+      </div>
+    </div>
+
+    <!-- SYNC -->
+
+    <div class="pant" id="pant-sync">
+      <div class="ptit">Sincronizacion</div>
+      <div class="alerta" id="sync-pill">Verificando conexion...</div>
+      <div class="panel">
+        <div class="phdr">ESTADO DEL SERVIDOR</div>
+        <div class="pbod">
+          <div class="snums">
+            <div class="sbox"><div class="sboxn" id="sn-loc">--</div><div class="sboxl">En este dispositivo</div></div>
+            <div class="sbox"><div class="sboxn" style="color:var(--cyan)" id="sn-srv">--</div><div class="sboxl">En el servidor</div></div>
+          </div>
+          <div style="font-family:var(--mono);font-size:var(--f9);color:var(--dim)" id="sync-last">Ultima sincronizacion: Nunca</div>
+        </div>
+      </div>
+      <button class="btn bp bfw" id="btn-sync" onclick="sincronizar()">DESCARGAR AL DISPOSITIVO</button>
+      <div class="panel">
+        <div class="phdr">COMO FUNCIONA</div>
+        <div class="pbod" style="font-family:var(--mono);font-size:var(--f11);color:var(--dim);gap:clamp(7px,1.8vw,10px);line-height:1.9">
+          <div>CON INTERNET: Los registros se guardan en el servidor y son visibles para todos los dispositivos en tiempo real.</div>
+          <div>SIN INTERNET: Busque por DNI, nombre o apodo con los datos descargados previamente.</div>
+          <div>SINCRONIZAR: Descarga la base completa del servidor para disponibilidad sin conexion.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MENU -->
+
+    <div class="pant" id="pant-menu">
+      <div class="ptit">Menu del Sistema</div>
+      <div class="panel" style="overflow:hidden">
+        <div style="padding:clamp(13px,3.2vw,19px) clamp(14px,3.5vw,20px);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:clamp(11px,2.8vw,16px);background:linear-gradient(90deg,var(--s2),var(--s1))">
+          <div class="avbtn" style="width:clamp(40px,10vw,52px);height:clamp(40px,10vw,52px);font-size:clamp(18px,4.5vw,24px)" id="m-av">?</div>
+          <div>
+            <div style="font-family:var(--cond);font-size:clamp(16px,4vw,19px);font-weight:700;color:var(--t1);letter-spacing:.04em" id="m-nom">--</div>
+            <div style="font-family:var(--mono);font-size:var(--f9);color:var(--cyan)" id="m-car">--</div>
+          </div>
+          <div style="margin-left:auto;font-family:var(--mono);font-size:var(--f9);color:var(--dim);text-align:right" id="m-ts">--</div>
+        </div>
+        <div class="mi" onclick="ir('sync')"><span class="mi-i">&#8635;</span><div><div>Sincronizar base de datos</div><div class="mi-sub">Descargar registros del servidor</div></div></div>
+        <div class="mi" onclick="pedirClaveAccesos()"><span class="mi-i">&#128272;</span><div><div>Historial de accesos</div><div class="mi-sub">Solo administradores</div></div></div>
+        <div class="mi" onclick="pedirClaveGestion()"><span class="mi-i">&#9881;</span><div><div>Gestion de contrasenas</div><div class="mi-sub">Cambiar claves del sistema</div></div></div>
+        <div class="mi" onclick="expCSV()"><span class="mi-i">&#8659;</span><div><div>Exportar base de datos</div><div class="mi-sub">Formato CSV</div></div></div>
+        <div class="mi peligro" onclick="doLogout()"><span class="mi-i">&#8617;</span><div><div>Cerrar sesion</div><div class="mi-sub">Registrar egreso del sistema</div></div></div>
+      </div>
+      <div class="panel">
+        <div class="phdr">CATEGORIAS DEL SISTEMA</div>
+        <div class="pbod" style="font-family:var(--mono);font-size:var(--f11);color:var(--dim);line-height:2.5;gap:0">
+          <div><span style="color:var(--rojo);font-weight:700">PROFUGO</span> &mdash; Pedido de captura activo, evade la justicia</div>
+          <div><span style="color:var(--ambar);font-weight:700">PEDIDO</span> &mdash; Orden judicial emitida, aun no localizado</div>
+          <div><span style="color:var(--violeta);font-weight:700">SIN PEDIDO</span> &mdash; Demorado o fichado de forma preventiva</div>
+          <div><span style="color:var(--verde);font-weight:700">DETENIDO</span> &mdash; Capturado y en custodia policial</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCESOS -->
+
+    <div class="pant" id="pant-accesos">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px">
+        <div class="ptit">Historial de Accesos</div>
+        <button class="btn bs bsm" onclick="expAcc()">EXPORTAR CSV</button>
+      </div>
+      <div class="alerta a-av">AREA RESTRINGIDA &mdash; Solo administradores autorizados</div>
+      <div class="panel" style="overflow:hidden"><div id="lista-acc"></div></div>
+    </div>
+
+    <!-- GESTION CLAVES -->
+
+    <div class="pant" id="pant-gestion">
+      <div class="ptit">Gestion de Contrasenas</div>
+      <div class="alerta a-av">Solo administradores &mdash; Los cambios afectan a todos los usuarios del sistema</div>
+      <div class="panel">
+        <div class="phdr">CLAVE DE INGRESO AL SISTEMA (LOGIN)</div>
+        <div class="gclave">
+          <div class="fg"><label class="flbl">Nueva clave de login</label><input class="fi" id="g-ln" type="password" placeholder="Nueva contrasena (minimo 4 caracteres)"></div>
+          <div class="fg"><label class="flbl">Confirmar nueva clave</label><input class="fi" id="g-lc" type="password" placeholder="Repetir contrasena"></div>
+          <button class="btn bw bfw" onclick="cambiarLogin()">ACTUALIZAR CLAVE DE LOGIN</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="phdr">CLAVE DE ADMINISTRADOR</div>
+        <div class="gclave">
+          <div class="fg"><label class="flbl">Nueva clave admin</label><input class="fi" id="g-an" type="password" placeholder="Nueva contrasena admin (minimo 4 caracteres)"></div>
+          <div class="fg"><label class="flbl">Confirmar nueva clave</label><input class="fi" id="g-ac" type="password" placeholder="Repetir contrasena"></div>
+          <button class="btn bw bfw" onclick="cambiarAdmin()">ACTUALIZAR CLAVE DE ADMIN</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="phdr">CONFIGURACION DE SESION</div>
+        <div class="gclave">
+          <div style="font-family:var(--mono);font-size:var(--f11);color:var(--dim);line-height:1.9">Defina cuanto tiempo permanece activa la sesion antes de cerrarse automaticamente.</div>
+          <div style="font-family:var(--mono);font-size:var(--f11);color:var(--cyan)" id="ses-cfg-txt">Cargando...</div>
+          <button class="btn bw bfw" onclick="pedirClaveGestion2()">CONFIGURAR DURACION DE SESION</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="phdr">ESTADO ACTUAL DE CLAVES</div>
+        <div class="gclave" style="font-family:var(--mono);font-size:var(--f11);color:var(--dim);gap:clamp(9px,2.2vw,13px)">
+          <div style="display:flex;align-items:center;gap:11px">Login: <span id="sh-login" style="color:var(--cyan);letter-spacing:.12em">------</span><button onclick="toggleClave('sh-login','login')" style="color:var(--dim2);font-size:var(--f9);text-decoration:underline;cursor:pointer">ver / ocultar</button></div>
+          <div style="display:flex;align-items:center;gap:11px">Admin: <span id="sh-admin" style="color:var(--ambar);letter-spacing:.12em">------</span><button onclick="toggleClave('sh-admin','admin')" style="color:var(--dim2);font-size:var(--f9);text-decoration:underline;cursor:pointer">ver / ocultar</button></div>
+        </div>
+      </div>
     </div>
 
   </div><!-- /mscroll -->
@@ -1726,6 +1906,190 @@ function cambiarEstado(){
 
 /* EDITAR */
 function editar(){
+  var isMobile = window.innerWidth < 768 || /Android|iPhone|iPad/i.test(navigator.userAgent);
+  if(isMobile){ editarMovil(); return; }
+  // PC: flujo original — ir('cargar')
+  var r=DB.find(function(x){return x.id===CID;});if(!r)return;
+  EID=CID;closeSheet();
+  function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
+  TIPO=r.tipo||'PROFUGO';
+  document.querySelectorAll('.topt').forEach(function(o){o.className='topt'+(o.dataset.t===TIPO?' t'+TIPO[0]:'');});
+  updSec(TIPO);
+  sv('f-dni',r.dni);sv('f-nom',r.nombre);sv('f-ali',r.alias);sv('f-fnac',r.fnac);
+  sv('f-dom',r.dom);sv('f-des',r.des);sv('f-veh',r.veh);sv('f-fam',r.fam);
+  sv('f-del',r.delito);sv('f-cau',r.causa);sv('f-juz',r.juz);sv('f-obs',r.obs);
+  sv('f-age',r.agente);sv('f-mot',r.motivo||'');sv('f-lug',r.lugar||'');
+  document.getElementById('f-pro').value=r.prov||'';
+  TMP=JSON.parse(JSON.stringify(FT[r.id]||[]));renderPrev();ir('cargar');
+}
+
+function editarMovil(){
+  var r=DB.find(function(x){return x.id===CID;});if(!r)return;
+  EID=CID; closeSheet();
+  TMP=JSON.parse(JSON.stringify(FT[r.id]||[]));
+  window.EIT_TIPO = r.tipo||'PROFUGO';
+
+  var em=document.getElementById('edit-movil');
+  if(!em){em=document.createElement('div');em.id='edit-movil';document.body.appendChild(em);}
+  em.style.cssText='position:fixed;inset:0;z-index:500;background:#03070e;overflow-y:auto;-webkit-overflow-scrolling:touch;display:block;';
+
+  // Limpiar y construir con createElement para evitar problemas de comillas
+  em.innerHTML='';
+
+  // — Header sticky —
+  var hdr=document.createElement('div');
+  hdr.style.cssText='position:sticky;top:0;z-index:10;background:#03070e;border-bottom:1px solid rgba(0,200,255,.15);padding:12px 16px;display:flex;align-items:center;gap:12px;';
+  var btnX=document.createElement('button');
+  btnX.innerHTML='&#10005;';
+  btnX.style.cssText='background:rgba(255,50,50,.12);border:1px solid rgba(255,80,80,.25);color:rgba(255,100,100,.8);font-size:18px;width:40px;height:40px;border-radius:50%;cursor:pointer;flex-shrink:0;';
+  btnX.onclick=function(){em.style.display='none';EID=null;};
+  var titulo=document.createElement('div');
+  titulo.style.cssText='flex:1;font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:16px;letter-spacing:.15em;color:#00c8ff;text-transform:uppercase;';
+  titulo.textContent='EDITAR REGISTRO';
+  var btnSave=document.createElement('button');
+  btnSave.textContent='GUARDAR';
+  btnSave.style.cssText='background:rgba(0,200,255,.15);border:1px solid rgba(0,200,255,.4);color:#00c8ff;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;padding:9px 18px;cursor:pointer;border-radius:4px;';
+  btnSave.onclick=guardarEdicionMovil;
+  hdr.appendChild(btnX);hdr.appendChild(titulo);hdr.appendChild(btnSave);
+  em.appendChild(hdr);
+
+  // — Estado/Tipo —
+  var secTipo=document.createElement('div');
+  secTipo.style.cssText='padding:14px 16px 8px;';
+  var lbTipo=document.createElement('div');
+  lbTipo.style.cssText='font-family:"Share Tech Mono",monospace;font-size:8px;color:rgba(0,200,255,.5);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;';
+  lbTipo.textContent='ESTADO DEL REGISTRO';
+  secTipo.appendChild(lbTipo);
+  var gridTipo=document.createElement('div');
+  gridTipo.style.cssText='display:grid;grid-template-columns:repeat(2,1fr);gap:6px;';
+  var tipos=[
+    {k:'PROFUGO',lbl:'PROFUGO',c:'#cc0e22'},
+    {k:'CAPTURA',lbl:'PEDIDO CAPTURA',c:'#e07000'},
+    {k:'DETENIDO',lbl:'DETENIDO',c:'#059669'},
+    {k:'SINPEDIDO',lbl:'SIN PEDIDO',c:'#7c3aed'}
+  ];
+  tipos.forEach(function(t){
+    var b=document.createElement('button');
+    b.textContent=t.lbl;
+    b.dataset.t=t.k;
+    b.className='em-tipo';
+    var isAct=(window.EIT_TIPO===t.k);
+    b.style.cssText='padding:10px 4px;border-radius:4px;border:1.5px solid '+t.c+';background:'+(isAct?'rgba(255,255,255,.1)':'rgba(255,255,255,.02)')+';color:'+t.c+';font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.08em;cursor:pointer;opacity:'+(isAct?'1':'.45')+';';
+    b.onclick=function(){
+      window.EIT_TIPO=t.k;
+      document.querySelectorAll('.em-tipo').forEach(function(x){
+        var isNow=(x.dataset.t===t.k);
+        x.style.opacity=isNow?'1':'.45';
+        x.style.background=isNow?'rgba(255,255,255,.1)':'rgba(255,255,255,.02)';
+      });
+    };
+    gridTipo.appendChild(b);
+  });
+  secTipo.appendChild(gridTipo);
+  em.appendChild(secTipo);
+
+  // — Fotos —
+  var secFotos=document.createElement('div');
+  secFotos.style.cssText='padding:10px 16px 8px;';
+  var lbFotos=document.createElement('div');
+  lbFotos.style.cssText='font-family:"Share Tech Mono",monospace;font-size:8px;color:rgba(0,200,255,.5);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;';
+  lbFotos.textContent='FOTOGRAFIAS';
+  secFotos.appendChild(lbFotos);
+  var fotoGrid=document.createElement('div');
+  fotoGrid.id='em-fotos';
+  fotoGrid.style.cssText='display:flex;flex-wrap:wrap;gap:8px;';
+  secFotos.appendChild(fotoGrid);
+  em.appendChild(secFotos);
+
+  function renderFotosMovil(){
+    var fg=document.getElementById('em-fotos');if(!fg)return;
+    fg.innerHTML='';
+    // Botón agregar
+    var lbl=document.createElement('label');
+    lbl.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;width:90px;height:90px;border:2px dashed rgba(0,200,255,.4);border-radius:8px;cursor:pointer;background:rgba(0,200,255,.05);flex-shrink:0;';
+    var inp=document.createElement('input');
+    inp.type='file'; inp.accept='image/*'; inp.multiple=true;
+    inp.style.display='none';
+    inp.addEventListener('change',function(){
+      Array.from(this.files).forEach(function(f){
+        var rd=new FileReader();
+        rd.onload=function(e){compImg(e.target.result,900,.75,function(c){TMP.push(c);renderFotosMovil();});};
+        rd.readAsDataURL(f);
+      });
+      this.value='';
+    });
+    var ico=document.createElement('span');ico.innerHTML='&#128247;';ico.style.fontSize='28px;';
+    var txt=document.createElement('span');txt.textContent='AGREGAR';txt.style.cssText='font-family:"Share Tech Mono",monospace;font-size:9px;color:rgba(0,200,255,.6);margin-top:6px;';
+    lbl.appendChild(inp);lbl.appendChild(ico);lbl.appendChild(txt);
+    fg.appendChild(lbl);
+    // Fotos existentes
+    TMP.forEach(function(s,i){
+      var d=document.createElement('div');
+      d.style.cssText='position:relative;width:90px;height:90px;border-radius:8px;overflow:hidden;flex-shrink:0;border:1px solid rgba(255,255,255,.1);';
+      var img=document.createElement('img');
+      img.src=s;img.style.cssText='width:100%;height:100%;object-fit:cover;';
+      var del=document.createElement('button');
+      del.innerHTML='&#10005;';
+      del.style.cssText='position:absolute;top:3px;right:3px;width:26px;height:26px;border-radius:50%;background:rgba(220,20,40,.9);border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;';
+      (function(idx){del.onclick=function(){TMP.splice(idx,1);renderFotosMovil();};})(i);
+      d.appendChild(img);d.appendChild(del);
+      fg.appendChild(d);
+    });
+  }
+  window.renderFotosMovil=renderFotosMovil;
+
+  // — Campos de texto —
+  var secCampos=document.createElement('div');
+  secCampos.style.cssText='padding:8px 16px 100px;';
+  var campos=[
+    ['NOMBRE *','em-nom',r.nombre||''],['DNI','em-dni',r.dni||''],
+    ['ALIAS / APODO','em-ali',r.alias||''],['DOMICILIO','em-dom',r.dom||''],
+    ['DELITO','em-del',r.delito||''],['CAUSA JUDICIAL','em-cau',r.causa||''],
+    ['DESCRIPCION','em-des',r.des||''],['OBSERVACION','em-obs',r.obs||''],
+    ['AGENTE RESPONSABLE *','em-age',r.agente||'']
+  ];
+  campos.forEach(function(c){
+    var wrap=document.createElement('div');wrap.style.marginBottom='12px;';
+    var lbl2=document.createElement('div');
+    lbl2.style.cssText='font-family:"Share Tech Mono",monospace;font-size:8px;color:rgba(0,200,255,.5);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;';
+    lbl2.textContent=c[0];
+    var inp2=document.createElement('input');
+    inp2.id=c[1];inp2.type='text';inp2.value=c[2];
+    inp2.style.cssText='width:100%;background:#0a1220;border:1px solid rgba(0,200,255,.2);border-radius:4px;padding:12px;color:#e8f0fe;font-family:"Share Tech Mono",monospace;font-size:13px;box-sizing:border-box;-webkit-appearance:none;margin-bottom:10px;';
+    wrap.appendChild(lbl2);wrap.appendChild(inp2);
+    secCampos.appendChild(wrap);
+  });
+  em.appendChild(secCampos);
+
+  renderFotosMovil();
+}
+
+function guardarEdicionMovil(){
+  function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+  var nombre=g('em-nom'), agente=g('em-age');
+  if(!nombre){toast('El nombre es obligatorio','err');return;}
+  if(!agente){toast('Ingrese el agente responsable','err');return;}
+  var r=DB.find(function(x){return x.id===EID;});
+  if(!r){toast('Registro no encontrado','err');return;}
+  var datos={
+    tipo:window.EIT_TIPO||r.tipo,
+    nombre:nombre, dni:g('em-dni'), alias:g('em-ali'), dom:g('em-dom'),
+    delito:g('em-del'), causa:g('em-cau'), des:g('em-des'), obs:g('em-obs'),
+    agente:agente
+  };
+  Object.assign(r, datos);
+  if(!r.hist)r.hist=[];
+  r.hist.push({a:'EDICION',d:'Datos actualizados (movil).',ag:agente,f:ahora()});
+  if(TMP.length) FT[r.id]=TMP;
+  dbSave(); ftSave();
+  if(SC&&ONLINE) SB.update('registros',r.id,Object.assign({},datos,{fotos:JSON.stringify(FT[r.id]||[]),hist:JSON.stringify(r.hist)})).then(function(){marcarCambio();});
+  updateStats(); buscar();
+  document.getElementById('edit-movil').style.display='none';
+  EID=null;
+  toast('Registro actualizado','ok');
+}
+
+function _editar_orig_placeholder_unused(){
   var r=DB.find(function(x){return x.id===CID;});if(!r)return;
   EID=CID;closeSheet();
   function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
@@ -2170,7 +2534,7 @@ function mkWCard(r){
   d.innerHTML=
     '<div style="text-align:center;padding:6px 8px 4px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:'+BC[cat]+';">'+BL[cat]+'</div>'+
     // Foto con aspect-ratio fijo
-    '<div style="width:100%;aspect-ratio:3/4;max-height:35vh;position:relative;overflow:hidden;background:#070d1a;border:1px solid rgba(0,200,255,.12);" onclick="(function(){CID='+r.id+';openSheet('+r.id+');})()" >'+foto+'</div>'+
+    '<div style="width:100%;height:clamp(180px,40vw,260px);position:relative;overflow:hidden;background:#070d1a;border:1px solid rgba(0,200,255,.12);" onclick="(function(){CID='+r.id+';openSheet('+r.id+');})()" >'+foto+'</div>'+
     // Datos — siempre en el DOM, visibles solo en activa
     '<div class="wc-info" style="display:none;padding:8px 6px 4px;">'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 8px;">'+
@@ -2226,7 +2590,7 @@ function renderCarousel(data){
   var cw=Math.min(Math.max(vw*0.72,200),300);
   outer.style.setProperty('--cw', cw+'px');
   // Inyectar la CSS var en el outer para que las cards la hereden
-  outer.style.cssText='position:relative;width:100%;overflow:visible;--cw:'+cw+'px;';
+  outer.style.cssText='position:relative;width:100%;overflow:hidden;--cw:'+cw+'px;';
 
   // Crear track si no existe
   var track=document.getElementById('car-track');
