@@ -1103,226 +1103,56 @@ input,select,textarea{font-family:var(--ui)}
         </div>
       </div>
 
-      <div id="panel-busqueda" style="display:none;flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;">
-      <!-- Divisor -->
-      <div style="flex-shrink:0;margin:clamp(10px,2.5vw,14px) clamp(16px,4vw,24px) 0;border-top:1px dashed rgba(0,200,255,.18);"></div>
+      <!-- BUSCADOR + STATS (siempre visibles) -->
+      <div style="flex-shrink:0;padding:10px clamp(10px,3vw,18px) 0;">
 
-      <!-- BUSCAR -->
-      <div class="sw">
-        <div class="sbar">
+        <!-- Barra de búsqueda -->
+        <div class="sbar" style="margin-bottom:10px;">
           <span class="sico">&#9906;</span>
-          <input id="q" type="search" placeholder="DNI, nombre o apodo..." oninput="buscar()" autocomplete="off" spellcheck="false">
+          <input id="q" type="search" placeholder="DNI, nombre o apodo..." oninput="(function(){var p=document.getElementById('panel-busqueda');if(p&&this.value){p.style.display='flex';p.style.flexDirection='column';}buscar();}).call(this)" autocomplete="off" spellcheck="false">
           <button class="sx" id="btn-clear" onclick="limpQ()" style="display:none">X</button>
         </div>
-        <div class="shint">BUSQUEDA LOCAL &nbsp;&middot;&nbsp; DISPONIBLE SIN INTERNET</div>
-      </div>
 
-      <!-- STATS -->
-      <div class="stats">
-        <div class="st st-p"><div class="stn" id="sp">0</div><div class="stl">Profugos</div></div>
-        <div class="st st-c"><div class="stn" id="sc">0</div><div class="stl">Pedidos</div></div>
-        <div class="st st-d"><div class="stn" id="sd">0</div><div class="stl">Detenidos</div></div>
-        <div class="st st-s"><div class="stn" id="ss">0</div><div class="stl">Sin Pedido</div></div>
-      </div>
-
-      <!-- FILTROS -->
-      <div class="filtros">
-        <button class="ff act" data-f=""          onclick="setF(this)">TODOS</button>
-        <button class="ff"     data-f="PROFUGO"   onclick="setF(this)">PROFUGOS</button>
-        <button class="ff"     data-f="CAPTURA"   onclick="setF(this)">PEDIDOS</button>
-        <button class="ff"     data-f="SINPEDIDO" onclick="setF(this)">SIN PEDIDO</button>
-        <button class="ff"     data-f="DETENIDO"  onclick="setF(this)">DETENIDOS</button>
-      </div>
-
-      <!-- LISTA -->
-      <div class="lista" id="lista">
-        <div class="vacio">
-          <div class="vacio-ico">&#9203; INICIALIZANDO</div>
-          <div class="vacio-txt">Conectando al servidor...<br>O presione SYNC para cargar.</div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- CARGAR
-
-    <!-- CARGAR
-
-    <!-- CARGAR<!-- CARGAR -->
-    <div class="pant" id="pant-cargar">
-      <div class="ptit">Nuevo Registro</div>
-      <div class="panel">
-        <div class="phdr">01 &mdash; TIPO DE REGISTRO</div>
-        <div class="pbod">
-          <div class="tgrid">
-            <div class="topt tP" data-t="PROFUGO"   onclick="selTipo(this)"><span class="toi">&#9888;</span><div class="ton">Profugo</div><div class="tod">Pedido activo</div></div>
-            <div class="topt"    data-t="CAPTURA"   onclick="selTipo(this)"><span class="toi">&#128196;</span><div class="ton">Pedido</div><div class="tod">Orden judicial</div></div>
-            <div class="topt"    data-t="SINPEDIDO" onclick="selTipo(this)"><span class="toi">&#128100;</span><div class="ton">Sin Pedido</div><div class="tod">Fichado prev.</div></div>
-            <div class="topt"    data-t="DETENIDO"  onclick="selTipo(this)"><span class="toi">&#10003;</span><div class="ton">Detenido</div><div class="tod">En custodia</div></div>
+        <!-- 4 recuadros clicables -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+          <div onclick="abrirLista('PROFUGO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(204,14,34,.35);border-top:3px solid #cc0e22;border-radius:6px;padding:10px 4px 8px;text-align:center;">
+            <div id="sp" style="font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:clamp(22px,6vw,32px);color:#cc0e22;line-height:1;">0</div>
+            <div style="font-family:Share Tech Mono,monospace;font-size:clamp(7px,1.8vw,9px);color:rgba(204,14,34,.7);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;">PROFUGOS</div>
+          </div>
+          <div onclick="abrirLista('CAPTURA')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(224,112,0,.35);border-top:3px solid #e07000;border-radius:6px;padding:10px 4px 8px;text-align:center;">
+            <div id="sc" style="font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:clamp(22px,6vw,32px);color:#e07000;line-height:1;">0</div>
+            <div style="font-family:Share Tech Mono,monospace;font-size:clamp(7px,1.8vw,9px);color:rgba(224,112,0,.7);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;">PEDIDOS</div>
+          </div>
+          <div onclick="abrirLista('DETENIDO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(5,150,105,.35);border-top:3px solid #059669;border-radius:6px;padding:10px 4px 8px;text-align:center;">
+            <div id="sd" style="font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:clamp(22px,6vw,32px);color:#059669;line-height:1;">0</div>
+            <div style="font-family:Share Tech Mono,monospace;font-size:clamp(7px,1.8vw,9px);color:rgba(5,150,105,.7);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;">DETENIDOS</div>
+          </div>
+          <div onclick="abrirLista('SINPEDIDO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(124,58,237,.35);border-top:3px solid #7c3aed;border-radius:6px;padding:10px 4px 8px;text-align:center;">
+            <div id="ss" style="font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:clamp(22px,6vw,32px);color:#7c3aed;line-height:1;">0</div>
+            <div style="font-family:Share Tech Mono,monospace;font-size:clamp(7px,1.8vw,9px);color:rgba(124,58,237,.7);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;">SIN PEDIDO</div>
           </div>
         </div>
       </div>
-      <div class="panel">
-        <div class="phdr">02 &mdash; FOTOGRAFIA</div>
-        <div class="pbod">
-          <div class="fdrop" onclick="document.getElementById('inp-foto').click()">
-            <input type="file" id="inp-foto" accept="image/*" multiple onchange="handleFotos(this)" style="display:none">
-            <span class="fdico">&#128247;</span>
-            <div class="fdtxt">Presione para agregar fotografia<br>Se admiten multiples imagenes</div>
-          </div>
-          <div class="frow" id="fotos-row"></div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="phdr">03 &mdash; DATOS PERSONALES</div>
-        <div class="pbod">
-          <div class="fg2">
-            <div class="fg"><label class="flbl">DNI *</label><input class="fi" id="f-dni" type="number" placeholder="Sin puntos" inputmode="numeric"></div>
-            <div class="fg"><label class="flbl">Fecha Nacimiento</label><input class="fi" id="f-fnac" placeholder="DD/MM/AAAA"></div>
-          </div>
-          <div class="fg"><label class="flbl">Apellido y Nombre *</label><input class="fi" id="f-nom" placeholder="APELLIDO, Nombre" oninput="this.value=this.value.toUpperCase()" autocapitalize="characters"></div>
-          <div class="fg"><label class="flbl">Apodo / Alias</label><input class="fi" id="f-ali" placeholder="Alias o apodo conocido"></div>
-          <div class="fg"><label class="flbl">Domicilio</label><input class="fi" id="f-dom" placeholder="Direccion, localidad"></div>
-          <div class="fg"><label class="flbl">Descripcion Fisica</label><textarea class="fta" id="f-des" placeholder="Altura, contextura, cabello, ojos, tatuajes..."></textarea></div>
-          <div class="fg"><label class="flbl">Vehiculo</label><input class="fi" id="f-veh" placeholder="Marca, modelo, dominio"></div>
-          <div class="fg"><label class="flbl">Familiares / Vinculos</label><input class="fi" id="f-fam" placeholder="Nombre, vinculo, domicilio"></div>
-        </div>
-      </div>
-      <div class="panel" id="sec-cau">
-        <div class="phdr">04 &mdash; CAUSA JUDICIAL</div>
-        <div class="pbod">
-          <div class="fg"><label class="flbl">Delito Imputado *</label><input class="fi" id="f-del" placeholder="Articulo y descripcion del delito"></div>
-          <div class="fg2">
-            <div class="fg"><label class="flbl">N de Causa</label><input class="fi" id="f-cau" placeholder="NNN/PRV/AAAA"></div>
-            <div class="fg"><label class="flbl">Provincia</label>
-              <select class="fs" id="f-pro">
-                <option value="">--</option><option>Buenos Aires</option><option>CABA</option><option>Catamarca</option><option>Chaco</option><option>Chubut</option><option>Cordoba</option><option>Corrientes</option><option>Entre Rios</option><option>Formosa</option><option>Jujuy</option><option>La Pampa</option><option>La Rioja</option><option>Mendoza</option><option>Misiones</option><option>Neuquen</option><option>Rio Negro</option><option>Salta</option><option>San Juan</option><option>San Luis</option><option>Santa Cruz</option><option>Santa Fe</option><option>Santiago del Estero</option><option>Tierra del Fuego</option><option selected>Tucuman</option><option>Federal</option>
-              </select>
-            </div>
-          </div>
-          <div class="fg"><label class="flbl">Juzgado / Fiscalia</label><input class="fi" id="f-juz" placeholder="Organo emisor"></div>
-        </div>
-      </div>
-      <div class="panel" id="sec-mot" style="display:none">
-        <div class="phdr">04 &mdash; MOTIVO DE FICHADO</div>
-        <div class="pbod">
-          <div class="fg"><label class="flbl">Motivo *</label><textarea class="fta" id="f-mot" placeholder="Motivo de la demora o fichado preventivo..."></textarea></div>
-          <div class="fg"><label class="flbl">Lugar / Circunstancia</label><input class="fi" id="f-lug" placeholder="Donde y como ocurrio"></div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="phdr">05 &mdash; OBSERVACIONES Y RESPONSABLE</div>
-        <div class="pbod">
-          <div class="fg"><label class="flbl">Observaciones</label><textarea class="fta" id="f-obs" placeholder="Vinculos, alertas, informacion adicional..."></textarea></div>
-          <div class="fg"><label class="flbl">Agente que Carga *</label><input class="fi" id="f-age" placeholder="Nombre y rango del agente"></div>
-        </div>
-      </div>
-      <div style="display:flex;gap:clamp(7px,1.8vw,11px);padding-bottom:clamp(16px,4vw,24px)">
-        <button class="btn bs bsm" onclick="limpForm()">LIMPIAR</button>
-        <button class="btn bp bfw" id="btn-reg" onclick="pedirClaveReg()" style="flex:1">REGISTRAR</button>
-      </div>
-    </div>
 
-    <!-- SYNC -->
-    <div class="pant" id="pant-sync">
-      <div class="ptit">Sincronizacion</div>
-      <div class="alerta" id="sync-pill">Verificando conexion...</div>
-      <div class="panel">
-        <div class="phdr">ESTADO DEL SERVIDOR</div>
-        <div class="pbod">
-          <div class="snums">
-            <div class="sbox"><div class="sboxn" id="sn-loc">--</div><div class="sboxl">En este dispositivo</div></div>
-            <div class="sbox"><div class="sboxn" style="color:var(--cyan)" id="sn-srv">--</div><div class="sboxl">En el servidor</div></div>
-          </div>
-          <div style="font-family:var(--mono);font-size:var(--f9);color:var(--dim)" id="sync-last">Ultima sincronizacion: Nunca</div>
+      <!-- PANEL LISTA (oculto, se abre al tocar recuadro o buscar) -->
+      <div id="panel-busqueda" style="display:none;flex:1;overflow:hidden;flex-direction:column;min-height:0;">
+        <!-- Filtros -->
+        <div class="frow" style="flex-shrink:0;padding:8px clamp(10px,3vw,18px) 0;">
+          <button class="ff act" data-f="" onclick="setF(this)">TODOS</button>
+          <button class="ff" data-f="PROFUGO"   onclick="setF(this)">PROFUGOS</button>
+          <button class="ff" data-f="CAPTURA"   onclick="setF(this)">PEDIDOS</button>
+          <button class="ff" data-f="SINPEDIDO" onclick="setF(this)">SIN PEDIDO</button>
+          <button class="ff" data-f="DETENIDO"  onclick="setF(this)">DETENIDOS</button>
+        </div>
+        <!-- Lista -->
+        <div class="lista" id="lista" style="flex:1;overflow-y:auto;padding:0 clamp(10px,3vw,18px);">
+          <div class="vacio"><div class="vacio-ico">&#9203; INICIALIZANDO</div></div>
+        </div>
+        <!-- Botón cerrar lista -->
+        <div style="flex-shrink:0;padding:8px;text-align:center;">
+          <button onclick="cerrarLista()" style="background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.25);color:rgba(0,200,255,.6);font-family:Share Tech Mono,monospace;font-size:11px;letter-spacing:.12em;padding:7px 24px;cursor:pointer;border-radius:3px;">✕ CERRAR</button>
         </div>
       </div>
-      <button class="btn bp bfw" id="btn-sync" onclick="sincronizar()">DESCARGAR AL DISPOSITIVO</button>
-      <div class="panel">
-        <div class="phdr">COMO FUNCIONA</div>
-        <div class="pbod" style="font-family:var(--mono);font-size:var(--f11);color:var(--dim);gap:clamp(7px,1.8vw,10px);line-height:1.9">
-          <div>CON INTERNET: Los registros se guardan en el servidor y son visibles para todos los dispositivos en tiempo real.</div>
-          <div>SIN INTERNET: Busque por DNI, nombre o apodo con los datos descargados previamente.</div>
-          <div>SINCRONIZAR: Descarga la base completa del servidor para disponibilidad sin conexion.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MENU -->
-    <div class="pant" id="pant-menu">
-      <div class="ptit">Menu del Sistema</div>
-      <div class="panel" style="overflow:hidden">
-        <div style="padding:clamp(13px,3.2vw,19px) clamp(14px,3.5vw,20px);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:clamp(11px,2.8vw,16px);background:linear-gradient(90deg,var(--s2),var(--s1))">
-          <div class="avbtn" style="width:clamp(40px,10vw,52px);height:clamp(40px,10vw,52px);font-size:clamp(18px,4.5vw,24px)" id="m-av">?</div>
-          <div>
-            <div style="font-family:var(--cond);font-size:clamp(16px,4vw,19px);font-weight:700;color:var(--t1);letter-spacing:.04em" id="m-nom">--</div>
-            <div style="font-family:var(--mono);font-size:var(--f9);color:var(--cyan)" id="m-car">--</div>
-          </div>
-          <div style="margin-left:auto;font-family:var(--mono);font-size:var(--f9);color:var(--dim);text-align:right" id="m-ts">--</div>
-        </div>
-        <div class="mi" onclick="ir('sync')"><span class="mi-i">&#8635;</span><div><div>Sincronizar base de datos</div><div class="mi-sub">Descargar registros del servidor</div></div></div>
-        <div class="mi" onclick="pedirClaveAccesos()"><span class="mi-i">&#128272;</span><div><div>Historial de accesos</div><div class="mi-sub">Solo administradores</div></div></div>
-        <div class="mi" onclick="pedirClaveGestion()"><span class="mi-i">&#9881;</span><div><div>Gestion de contrasenas</div><div class="mi-sub">Cambiar claves del sistema</div></div></div>
-        <div class="mi" onclick="expCSV()"><span class="mi-i">&#8659;</span><div><div>Exportar base de datos</div><div class="mi-sub">Formato CSV</div></div></div>
-        <div class="mi peligro" onclick="doLogout()"><span class="mi-i">&#8617;</span><div><div>Cerrar sesion</div><div class="mi-sub">Registrar egreso del sistema</div></div></div>
-      </div>
-      <div class="panel">
-        <div class="phdr">CATEGORIAS DEL SISTEMA</div>
-        <div class="pbod" style="font-family:var(--mono);font-size:var(--f11);color:var(--dim);line-height:2.5;gap:0">
-          <div><span style="color:var(--rojo);font-weight:700">PROFUGO</span> &mdash; Pedido de captura activo, evade la justicia</div>
-          <div><span style="color:var(--ambar);font-weight:700">PEDIDO</span> &mdash; Orden judicial emitida, aun no localizado</div>
-          <div><span style="color:var(--violeta);font-weight:700">SIN PEDIDO</span> &mdash; Demorado o fichado de forma preventiva</div>
-          <div><span style="color:var(--verde);font-weight:700">DETENIDO</span> &mdash; Capturado y en custodia policial</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ACCESOS -->
-    <div class="pant" id="pant-accesos">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px">
-        <div class="ptit">Historial de Accesos</div>
-        <button class="btn bs bsm" onclick="expAcc()">EXPORTAR CSV</button>
-      </div>
-      <div class="alerta a-av">AREA RESTRINGIDA &mdash; Solo administradores autorizados</div>
-      <div class="panel" style="overflow:hidden"><div id="lista-acc"></div></div>
-    </div>
-
-    <!-- GESTION CLAVES -->
-    <div class="pant" id="pant-gestion">
-      <div class="ptit">Gestion de Contrasenas</div>
-      <div class="alerta a-av">Solo administradores &mdash; Los cambios afectan a todos los usuarios del sistema</div>
-      <div class="panel">
-        <div class="phdr">CLAVE DE INGRESO AL SISTEMA (LOGIN)</div>
-        <div class="gclave">
-          <div class="fg"><label class="flbl">Nueva clave de login</label><input class="fi" id="g-ln" type="password" placeholder="Nueva contrasena (minimo 4 caracteres)"></div>
-          <div class="fg"><label class="flbl">Confirmar nueva clave</label><input class="fi" id="g-lc" type="password" placeholder="Repetir contrasena"></div>
-          <button class="btn bw bfw" onclick="cambiarLogin()">ACTUALIZAR CLAVE DE LOGIN</button>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="phdr">CLAVE DE ADMINISTRADOR</div>
-        <div class="gclave">
-          <div class="fg"><label class="flbl">Nueva clave admin</label><input class="fi" id="g-an" type="password" placeholder="Nueva contrasena admin (minimo 4 caracteres)"></div>
-          <div class="fg"><label class="flbl">Confirmar nueva clave</label><input class="fi" id="g-ac" type="password" placeholder="Repetir contrasena"></div>
-          <button class="btn bw bfw" onclick="cambiarAdmin()">ACTUALIZAR CLAVE DE ADMIN</button>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="phdr">CONFIGURACION DE SESION</div>
-        <div class="gclave">
-          <div style="font-family:var(--mono);font-size:var(--f11);color:var(--dim);line-height:1.9">Defina cuanto tiempo permanece activa la sesion antes de cerrarse automaticamente.</div>
-          <div style="font-family:var(--mono);font-size:var(--f11);color:var(--cyan)" id="ses-cfg-txt">Cargando...</div>
-          <button class="btn bw bfw" onclick="pedirClaveGestion2()">CONFIGURAR DURACION DE SESION</button>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="phdr">ESTADO ACTUAL DE CLAVES</div>
-        <div class="gclave" style="font-family:var(--mono);font-size:var(--f11);color:var(--dim);gap:clamp(9px,2.2vw,13px)">
-          <div style="display:flex;align-items:center;gap:11px">Login: <span id="sh-login" style="color:var(--cyan);letter-spacing:.12em">------</span><button onclick="toggleClave('sh-login','login')" style="color:var(--dim2);font-size:var(--f9);text-decoration:underline;cursor:pointer">ver / ocultar</button></div>
-          <div style="display:flex;align-items:center;gap:11px">Admin: <span id="sh-admin" style="color:var(--ambar);letter-spacing:.12em">------</span><button onclick="toggleClave('sh-admin','admin')" style="color:var(--dim2);font-size:var(--f9);text-decoration:underline;cursor:pointer">ver / ocultar</button></div>
-        </div>
-      </div>
-      </div><!-- /panel-busqueda -->
     </div>
 
   </div><!-- /mscroll -->
@@ -1643,14 +1473,11 @@ function ir(id){
   });
   document.querySelectorAll('.bn').forEach(function(b,i){b.classList.toggle('act',i===NI[id]);});
   document.getElementById('mscroll').scrollTop=0;
-  var pbEl=document.getElementById('pb');
-  var pBus=document.getElementById('panel-busqueda');
   if(id==='buscar'){
-    if(pbEl) pbEl.style.display='flex';
-    if(pBus) pBus.style.display='flex';
+    document.getElementById('pb').style.display='flex';
     setTimeout(function(){var q=document.getElementById('q');if(q)q.focus();},120);
   } else {
-    if(pBus) pBus.style.display='none';
+    document.getElementById('panel-busqueda').style.display='none';
     var e=document.getElementById('pant-'+id);if(e)e.classList.add('on');
   }
   if(id==='sync')renderSync();
@@ -1667,6 +1494,17 @@ function updateStats(){
 }
 
 /* BUSQUEDA */
+function abrirLista(cat){
+  FIL=cat;
+  document.querySelectorAll('.ff').forEach(function(b){b.classList.toggle('act',b.dataset.f===cat);});
+  var p=document.getElementById('panel-busqueda');
+  if(p){p.style.display='flex';p.style.flexDirection='column';}
+  buscar();
+}
+function cerrarLista(){
+  var p=document.getElementById('panel-busqueda');
+  if(p) p.style.display='none';
+}
 function setF(btn){FIL=btn.dataset.f;document.querySelectorAll('.ff').forEach(function(b){b.classList.toggle('act',b===btn);});buscar();}
 function limpQ(){document.getElementById('q').value='';document.getElementById('btn-clear').style.display='none';buscar();}
 function buscar(){
