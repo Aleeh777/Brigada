@@ -2146,7 +2146,7 @@ verClave=function(){
   else if(modo==='gest'||modo==='gest2'){ir('gestion');if(modo==='gest2')setTimeout(abrirConfigSesion,120);}
 };
 
-// ── CARRUSEL POLAROID ──────────────────────
+// ── CARRUSEL ──────────────────────────────
 var _carIdx=0, _carItems=[];
 var _swipeX=0, _swipeY=0, _swipeLock=false;
 
@@ -2154,130 +2154,110 @@ function mkWCard(r){
   var cat=r.categoria||'PROFUGO';
   var BL={PROFUGO:'PROFUGO',CAPTURA:'PEDIDO',SINPEDIDO:'SIN PEDIDO',DETENIDO:'DETENIDO'};
   var BC={PROFUGO:'#cc0e22',CAPTURA:'#e07000',SINPEDIDO:'#7c3aed',DETENIDO:'#059669'};
+  var d=document.createElement('div');
+  d.setAttribute('data-cat',cat);
+  d.setAttribute('data-id',String(r.id));
+  // Flex item — ancho fijo, NO position absolute
+  d.style.cssText='flex-shrink:0;width:var(--cw,260px);transition:opacity .3s,filter .3s;';
   var fo=FT[r.id]||[];
   var foto=fo.length
     ?'<img src="'+fo[0]+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;display:block;">'
-    :'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.15;font-size:60px;">&#128100;</div>';
-  var nom=r.nombre?r.nombre.split(',')[0].substring(0,24):'SIN NOMBRE';
+    :'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:50px;opacity:.1;">&#128100;</div>';
+  var nom=r.nombre?r.nombre.split(',')[0].substring(0,22):'SIN NOMBRE';
   var dni=r.dni||'---';
-  var del2=r.delito?r.delito.substring(0,24)+(r.delito.length>24?'..':''):'---';
+  var del2=r.delito?r.delito.substring(0,22)+(r.delito.length>22?'..':''):'---';
   var dom=r.dom||'---';
-
-  var wrap=document.createElement('div');
-  wrap.setAttribute('data-id',String(r.id));
-  wrap.setAttribute('data-cat',cat);
-  // Polaroid: fondo blanco, sombra, padding abajo para el "pie"
-  wrap.style.cssText=[
-    'position:absolute',
-    'top:0','left:50%',
-    'transform-origin:bottom center',
-    'background:#0d1525',
-    'border:3px solid rgba(255,255,255,.07)',
-    'box-shadow:0 8px 40px rgba(0,0,0,.7)',
-    'border-radius:4px',
-    'cursor:pointer',
-    'user-select:none',
-    '-webkit-user-select:none',
-    'transition:transform .45s cubic-bezier(.4,0,.2,1), opacity .45s ease',
-  ].join(';');
-
-  wrap.innerHTML=
-    // Estado
-    '<div style="text-align:center;padding:8px 10px 4px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:'+BC[cat]+';">'+BL[cat]+'</div>'+
-    // Foto
-    '<div style="width:100%;aspect-ratio:4/5;max-height:42vh;position:relative;overflow:hidden;background:#070d1a;" onclick="(function(){CID='+r.id+';openSheet('+r.id+');})()" >'+foto+'</div>'+
-    // Pie Polaroid — datos
-    '<div class="wc-info" style="padding:10px 10px 8px;">'+
+  d.innerHTML=
+    '<div style="text-align:center;padding:6px 8px 4px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:'+BC[cat]+';">'+BL[cat]+'</div>'+
+    // Foto con aspect-ratio fijo
+    '<div style="width:100%;aspect-ratio:3/4;max-height:42vh;position:relative;overflow:hidden;background:#070d1a;border:1px solid rgba(0,200,255,.12);" onclick="(function(){CID='+r.id+';openSheet('+r.id+');})()" >'+foto+'</div>'+
+    // Datos — siempre en el DOM, visibles solo en activa
+    '<div class="wc-info" style="display:none;padding:8px 6px 4px;">'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 8px;">'+
-        '<div><div style="font-family:Share Tech Mono,monospace;font-size:7px;color:rgba(0,200,255,.5);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">NOMBRE</div><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;color:#e8edf5;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+nom+'</div></div>'+
-        '<div><div style="font-family:Share Tech Mono,monospace;font-size:7px;color:rgba(0,200,255,.5);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DNI</div><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;color:#e8edf5;">'+dni+'</div></div>'+
-        '<div><div style="font-family:Share Tech Mono,monospace;font-size:7px;color:rgba(0,200,255,.5);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DELITO</div><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;color:#e8edf5;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+del2+'</div></div>'+
-        '<div><div style="font-family:Share Tech Mono,monospace;font-size:7px;color:rgba(0,200,255,.5);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DOMICILIO</div><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;color:#e8edf5;text-transform:uppercase;white-space:normal;line-height:1.25;word-break:break-word;">'+dom+'</div></div>'+
+        '<div><div style="font-family:Share Tech Mono,monospace;font-size:7px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">NOMBRE</div><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:#fff;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+nom+'</div></div>'+
+        '<div><div style="font-family:Share Tech Mono,monospace;font-size:7px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DNI</div><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:#fff;">'+dni+'</div></div>'+
+        '<div><div style="font-family:Share Tech Mono,monospace;font-size:7px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DELITO</div><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:#fff;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+del2+'</div></div>'+
+        '<div><div style="font-family:Share Tech Mono,monospace;font-size:7px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DOMICILIO</div><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:#fff;text-transform:uppercase;white-space:normal;line-height:1.3;word-break:break-word;">'+dom+'</div></div>'+
       '</div>'+
-      '<button onclick="(function(e){e.stopPropagation();CID='+r.id+';editar();})(event)" style="width:100%;margin-top:8px;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.3);color:#00c8ff;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:6px 4px;cursor:pointer;border-radius:2px;">EDITAR</button>'+
-    '</div>';
-  return wrap;
+    '</div>'+
+    '<button onclick="(function(e){e.stopPropagation();CID='+r.id+';editar();})(event)" style="display:none;width:100%;margin-top:6px;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.3);color:#00c8ff;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:7px 4px;cursor:pointer;border-radius:2px;">EDITAR</button>';
+  return d;
 }
 
-// Aplicar posición/estilo a cada card según su posición relativa al activo
-function _layoutCards(){
-  var outer=document.getElementById('carousel-outer');
-  if(!outer)return;
-  var cards=outer.querySelectorAll('[data-cat]');
-  var n=cards.length; if(!n)return;
-  var outerW=outer.offsetWidth;
-  // Ancho de la card activa: 72% del outer, máx 300px
-  var W=Math.min(outerW*0.72, 300);
-
+function _activarCard(cards, idx){
   cards.forEach(function(c,i){
-    // Distancia circular al activo
-    var diff=i-_carIdx;
-    // Normalizar para circular
-    if(diff>n/2) diff-=n;
-    if(diff<-n/2) diff+=n;
-
-    var absDiff=Math.abs(diff);
-
-    if(absDiff>2){
-      // Ocultar cards muy lejanas
-      c.style.opacity='0';
-      c.style.pointerEvents='none';
-      c.style.zIndex='0';
-      c.style.opacity='0';
-      return;
+    var info=c.querySelector('.wc-info'), btn=c.querySelector('button');
+    if(i===idx){
+      c.style.opacity='1'; c.style.filter='none';
+      if(info) info.style.display='block';
+      if(btn)  btn.style.display='block';
+    } else {
+      c.style.opacity='.32'; c.style.filter='brightness(.32) blur(1px)';
+      if(info) info.style.display='none';
+      if(btn)  btn.style.display='none';
     }
-
-    // Escala: activa=1, siguiente=0.82, más lejos=0.68
-    var scale=[1, 0.84, 0.70][absDiff]||0.6;
-    // Rotación leve (como pila de fotos)
-    var rotate=diff*5; // -5deg izq, +5deg der
-    // Desplazamiento lateral
-    var tx= diff * W * 0.62;
-    // Vertical: las laterales bajan un poco
-    var ty= absDiff * 8;
-    // Ancho
-    c.style.width=W+'px';
-    c.style.marginLeft=(-W/2)+'px'; // centrar en left:50%
-    c.style.transform='translateX('+tx+'px) translateY('+ty+'px) scale('+scale+') rotate('+rotate+'deg)';
-    c.style.opacity= absDiff===0?'1': absDiff===1?'0.55':'0.28';
-    c.style.zIndex= String(10-absDiff);
-    c.style.pointerEvents= absDiff===0?'auto':'none';
-    // Datos: solo en la activa
-    // Ajustar altura del outer a la card activa
-    if(absDiff===0){
-      // Dar tiempo al DOM para calcular altura real
-      setTimeout(function(){
-        var outerEl=document.getElementById('carousel-outer');
-        if(outerEl && c.offsetHeight > 0){
-          outerEl.style.height = c.offsetHeight+'px';
-        }
-      }, 50);
-    }
-    var info=c.querySelector('.wc-info');
-    var btn=c.querySelector('button');
-    if(info) info.style.display=absDiff===0?'block':'none';
-    if(btn)  btn.style.display =absDiff===0?'block':'none';
   });
+}
+
+function _centrarCard(idx, animate){
+  var track=document.getElementById('car-track');
+  var outer=document.getElementById('carousel-outer');
+  if(!track||!outer) return;
+  var cards=track.querySelectorAll('[data-cat]');
+  if(!cards[idx]) return;
+  var outerW=outer.offsetWidth;
+  var cardW=cards[idx].offsetWidth||260;
+  var gap=12;
+  var offset=0;
+  for(var i=0;i<idx;i++) offset+=(cards[i]?cards[i].offsetWidth:cardW)+gap;
+  var tx=offset-(outerW-cardW)/2;
+  if(tx<0)tx=0;
+  track.style.transition=animate?'transform .35s cubic-bezier(.4,0,.2,1)':'none';
+  track.style.transform='translateX(-'+tx+'px)';
 }
 
 function renderCarousel(data){
   var outer=document.getElementById('carousel-outer');
   var dotsEl=document.getElementById('car-dots');
-  if(!outer||!dotsEl)return;
+  if(!outer||!dotsEl) return;
+
+  // Calcular ancho de card según pantalla
+  var vw=window.innerWidth;
+  var cw=Math.min(Math.max(vw*0.72,200),300);
+  outer.style.setProperty('--cw', cw+'px');
+  // Inyectar la CSS var en el outer para que las cards la hereden
+  outer.style.cssText='position:relative;width:100%;overflow:hidden;--cw:'+cw+'px;';
+
+  // Crear track si no existe
+  var track=document.getElementById('car-track');
+  if(!track){
+    track=document.createElement('div');
+    track.id='car-track';
+    track.style.cssText='display:flex;gap:12px;align-items:flex-start;will-change:transform;padding:0 '+Math.round((vw-cw)/2)+'px;';
+    outer.appendChild(track);
+  } else {
+    track.innerHTML='';
+    track.style.padding='0 '+Math.round((vw-cw)/2)+'px;';
+  }
+  dotsEl.innerHTML='';
+
   var ord={PROFUGO:0,CAPTURA:1,SINPEDIDO:2,DETENIDO:3};
   _carItems=data.slice().sort(function(a,b){return (ord[a.categoria]||9)-(ord[b.categoria]||9);});
-  if(!_carItems.length)return;
-  outer.innerHTML=''; dotsEl.innerHTML='';
+  if(!_carItems.length) return;
+
   _carItems.forEach(function(r,i){
-    outer.appendChild(mkWCard(r));
+    track.appendChild(mkWCard(r));
     var dot=document.createElement('div');
     dot.className='car-dot'+(i===0?' act':'');
     dot.onclick=(function(idx){return function(){carGoTo(idx);};})(i);
     dotsEl.appendChild(dot);
   });
+
   _carIdx=0;
   requestAnimationFrame(function(){requestAnimationFrame(function(){
-    _layoutCards();
+    var cards=track.querySelectorAll('[data-cat]');
+    _activarCard(cards,0);
+    _centrarCard(0,false);
   });});
   _initSwipe(outer);
 }
@@ -2285,20 +2265,22 @@ function renderCarousel(data){
 function carMove(dir){
   var n=_carItems.length; if(!n)return;
   _carIdx=(_carIdx+dir+n)%n;
-  _layoutCards();
-  document.querySelectorAll('.car-dot').forEach(function(d,i){d.className='car-dot'+(i===_carIdx?' act':'');});
+  carGoTo(_carIdx);
 }
 
 function carGoTo(idx){
   var n=_carItems.length; if(!n)return;
   _carIdx=((idx%n)+n)%n;
-  _layoutCards();
+  var track=document.getElementById('car-track');
+  if(!track)return;
+  var cards=track.querySelectorAll('[data-cat]');
+  _activarCard(cards,_carIdx);
+  _centrarCard(_carIdx,true);
   document.querySelectorAll('.car-dot').forEach(function(d,i){d.className='car-dot'+(i===_carIdx?' act':'');});
 }
 
 function _initSwipe(el){
   if(!el||el._sw)return; el._sw=1;
-  // ── TOUCH (móvil) ──
   el.addEventListener('touchstart',function(e){_swipeX=e.touches[0].clientX;_swipeY=e.touches[0].clientY;_swipeLock=false;},{passive:true});
   el.addEventListener('touchmove',function(e){
     if(_swipeLock)return;
@@ -2306,19 +2288,15 @@ function _initSwipe(el){
     e.preventDefault();
   },{passive:false});
   el.addEventListener('touchend',function(e){
-    if(!_swipeLock&&Math.abs(e.changedTouches[0].clientX-_swipeX)>40) carMove(e.changedTouches[0].clientX<_swipeX?1:-1);
+    if(!_swipeLock&&Math.abs(e.changedTouches[0].clientX-_swipeX)>40)carMove(e.changedTouches[0].clientX<_swipeX?1:-1);
   },{passive:true});
-  // ── MOUSE (PC) ──
-  var _mDown=false, _mX=0, _mMoved=false;
-  el.addEventListener('mousedown',function(e){_mDown=true;_mX=e.clientX;_mMoved=false;el.style.cursor='grabbing';});
-  window.addEventListener('mousemove',function(e){
-    if(!_mDown)return;
-    if(Math.abs(e.clientX-_mX)>6) _mMoved=true;
-  });
+  // Mouse drag PC
+  var mDown=false,mX=0,mMoved=false;
+  el.addEventListener('mousedown',function(e){mDown=true;mX=e.clientX;mMoved=false;el.style.cursor='grabbing';});
+  window.addEventListener('mousemove',function(e){if(!mDown)return;if(Math.abs(e.clientX-mX)>6)mMoved=true;});
   window.addEventListener('mouseup',function(e){
-    if(!_mDown)return;
-    _mDown=false; el.style.cursor='grab';
-    if(_mMoved&&Math.abs(e.clientX-_mX)>40) carMove(e.clientX<_mX?1:-1);
+    if(!mDown)return; mDown=false; el.style.cursor='grab';
+    if(mMoved&&Math.abs(e.clientX-mX)>40)carMove(e.clientX<mX?1:-1);
   });
   el.style.cursor='grab';
 }
