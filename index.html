@@ -1815,8 +1815,9 @@ function openSheet(id){
         +'<br><span style="font-size:var(--f9);color:var(--dim2)">'+x.ag+' / '+x.f+'</span></div></div>';
     }).join('')
     :'<div class="vacio"><div class="vacio-txt">Sin historial de cambios.</div></div>';
-  document.getElementById('sh-del').style.display='none';
-  document.getElementById('sh-edit').style.display='none';
+  document.getElementById('sh-del').style.display=_ADM_OK?'inline-flex':'none';
+  document.getElementById('sh-edit').style.display=_ADM_OK?'inline-flex':'none';
+  if(_ADM_OK){document.getElementById('sh-admlock').style.display='none';document.getElementById('sh-admform').style.display='flex';}
   hideAdm();shTab(0);
   document.getElementById('sheet').classList.add('open');
   pushState(PAGINA);
@@ -1829,8 +1830,9 @@ function shTab(i){
 function hideAdm(){
   document.getElementById('sh-admlock').style.display='flex';
   document.getElementById('sh-admform').style.display='none';
-  document.getElementById('sh-del').style.display='none';
-  document.getElementById('sh-edit').style.display='none';
+  document.getElementById('sh-del').style.display=_ADM_OK?'inline-flex':'none';
+  document.getElementById('sh-edit').style.display=_ADM_OK?'inline-flex':'none';
+  if(_ADM_OK){document.getElementById('sh-admlock').style.display='none';document.getElementById('sh-admform').style.display='flex';}
 }
 
 /* MODAL CLAVE */
@@ -1858,16 +1860,29 @@ function verClave(){
   }
   cerrarModal();
   if(MC_MODE==='admin'){
+    _ADM_OK=true;
     document.getElementById('sh-admlock').style.display='none';
     document.getElementById('sh-admform').style.display='flex';
     document.getElementById('sh-del').style.display='inline-flex';
     document.getElementById('sh-edit').style.display='inline-flex';
-    toast('Acceso admin concedido','ok');
+    toast('Acceso admin concedido — activo hasta recargar','ok');
   }else if(MC_MODE==='reg'){doRegistrar();}
   else if(MC_MODE==='acc'){ir('accesos');}
   else if(MC_MODE==='gest'){ir('gestion');}
 }
-function pedirAdmin(){abrirModal('admin');}
+function pedirAdmin(){
+  if(_ADM_OK){
+    // Ya tiene acceso admin — mostrar directamente
+    document.getElementById('sh-admlock').style.display='none';
+    document.getElementById('sh-admform').style.display='flex';
+    document.getElementById('sh-del').style.display='inline-flex';
+    document.getElementById('sh-edit').style.display='inline-flex';
+    return;
+  }
+  // Pedir clave
+  _pedirAdmin_orig();
+}
+function _pedirAdmin_orig(){abrirModal('admin');}
 function pedirClaveReg(){abrirModal('reg');}
 function pedirClaveAccesos(){abrirModal('acc');}
 function pedirClaveGestion(){abrirModal('gest');}
