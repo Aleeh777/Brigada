@@ -1061,7 +1061,7 @@ input,select,textarea{font-family:var(--ui)}
   <div class="mscroll" id="mscroll">
 
     <!-- BUSCAR -->
-    <div id="pb" style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+    <div id="pb" style="display:flex;flex-direction:column;height:100%;overflow-y:auto;overflow-x:hidden;">
 
       <!-- ENCABEZADO -->
       <div style="flex-shrink:0;padding:6px 14px 0;">
@@ -2170,7 +2170,7 @@ function mkWCard(r){
   d.innerHTML=
     '<div style="text-align:center;padding:6px 8px 4px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:'+BC[cat]+';">'+BL[cat]+'</div>'+
     // Foto con aspect-ratio fijo
-    '<div style="width:100%;aspect-ratio:3/4;max-height:42vh;position:relative;overflow:hidden;background:#070d1a;border:1px solid rgba(0,200,255,.12);" onclick="(function(){CID='+r.id+';openSheet('+r.id+');})()" >'+foto+'</div>'+
+    '<div style="width:100%;aspect-ratio:3/4;max-height:35vh;position:relative;overflow:hidden;background:#070d1a;border:1px solid rgba(0,200,255,.12);" onclick="(function(){CID='+r.id+';openSheet('+r.id+');})()" >'+foto+'</div>'+
     // Datos — siempre en el DOM, visibles solo en activa
     '<div class="wc-info" style="display:none;padding:8px 6px 4px;">'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 8px;">'+
@@ -2226,7 +2226,7 @@ function renderCarousel(data){
   var cw=Math.min(Math.max(vw*0.72,200),300);
   outer.style.setProperty('--cw', cw+'px');
   // Inyectar la CSS var en el outer para que las cards la hereden
-  outer.style.cssText='position:relative;width:100%;overflow:hidden;--cw:'+cw+'px;';
+  outer.style.cssText='position:relative;width:100%;overflow:visible;--cw:'+cw+'px;';
 
   // Crear track si no existe
   var track=document.getElementById('car-track');
