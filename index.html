@@ -2600,66 +2600,134 @@ function mkWCard(r){
   var cat=r.categoria||'PROFUGO';
   var BL={PROFUGO:'PROFUGO',CAPTURA:'PEDIDO',SINPEDIDO:'SIN PEDIDO',DETENIDO:'DETENIDO'};
   var BC={PROFUGO:'#cc0e22',CAPTURA:'#e07000',SINPEDIDO:'#7c3aed',DETENIDO:'#059669'};
-  var d=document.createElement('div');
-  d.setAttribute('data-cat',cat);
-  d.setAttribute('data-id',String(r.id));
-  // Flex item — ancho fijo, NO position absolute
-  d.style.cssText='flex-shrink:0;width:var(--cw,260px);transition:opacity .3s,filter .3s;';
+
   var fo=FT[r.id]||[];
-  var foto=fo.length
-    ?'<img src="'+fo[0]+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;display:block;">'
-    :'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:50px;opacity:.1;">&#128100;</div>';
   var nom=r.nombre?r.nombre.split(',')[0].substring(0,22):'SIN NOMBRE';
   var dni=r.dni||'---';
   var del2=r.delito?r.delito.substring(0,22)+(r.delito.length>22?'..':''):'---';
   var dom=r.dom||'---';
-  d.innerHTML=
-    '<div style="text-align:center;padding:6px 8px 4px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:'+BC[cat]+';">'+BL[cat]+'</div>'+
-    // Foto con aspect-ratio fijo
-    '<div style="width:100%;height:clamp(180px,40vw,260px);position:relative;overflow:hidden;background:#070d1a;border:1px solid rgba(0,200,255,.12);" onclick="(function(){CID='+r.id+';openSheet('+r.id+');})()" >'+foto+'</div>'+
-    // Datos — siempre en el DOM, visibles solo en activa
-    '<div class="wc-info" style="display:none;padding:8px 6px 4px;">'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 8px;">'+
-        '<div><div style="font-family:Share Tech Mono,monospace;font-size:7px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">NOMBRE</div><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:#fff;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+nom+'</div></div>'+
-        '<div><div style="font-family:Share Tech Mono,monospace;font-size:7px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DNI</div><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:#fff;">'+dni+'</div></div>'+
-        '<div><div style="font-family:Share Tech Mono,monospace;font-size:7px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DELITO</div><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:#fff;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+del2+'</div></div>'+
-        '<div><div style="font-family:Share Tech Mono,monospace;font-size:7px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DOMICILIO</div><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:#fff;text-transform:uppercase;white-space:normal;line-height:1.3;word-break:break-word;">'+dom+'</div></div>'+
-      '</div>'+
+
+  var wrap=document.createElement('div');
+  wrap.setAttribute('data-cat',cat);
+  wrap.setAttribute('data-id',String(r.id));
+  // Polaroid card — position absolute, centrada por JS
+  wrap.style.cssText=[
+    'position:absolute',
+    'left:50%',
+    'top:0',
+    'transform-origin:bottom center',
+    'background:#fff',
+    'border-radius:3px',
+    'box-shadow:0 8px 32px rgba(0,0,0,.55)',
+    'cursor:pointer',
+    'user-select:none',
+    '-webkit-user-select:none',
+    'transition:transform .45s cubic-bezier(.4,0,.2,1),opacity .35s ease,filter .35s ease',
+    'padding:8px 8px 0 8px'
+  ].join(';');
+
+  // Foto
+  var fotoEl=document.createElement('div');
+  fotoEl.style.cssText='width:100%;background:#111;overflow:hidden;position:relative;';
+  if(fo.length){
+    var img=document.createElement('img');
+    img.src=fo[0];
+    img.style.cssText='width:100%;height:100%;object-fit:cover;object-position:top center;display:block;';
+    fotoEl.appendChild(img);
+  } else {
+    fotoEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:48px;opacity:.15;color:#333;">&#128100;</div>';
+  }
+  fotoEl.onclick=function(){CID=r.id;openSheet(r.id);};
+  wrap.appendChild(fotoEl);
+
+  // Franja blanca inferior (estilo Polaroid)
+  var info=document.createElement('div');
+  info.className='wc-info';
+  info.style.cssText='padding:6px 4px 8px;display:none;';
+  info.innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 6px;">'+
+      '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:#999;letter-spacing:.08em;text-transform:uppercase;">NOMBRE</div>'+
+          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;color:#111;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+nom+'</div></div>'+
+      '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:#999;letter-spacing:.08em;text-transform:uppercase;">DNI</div>'+
+          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;color:#111;">'+dni+'</div></div>'+
+      '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:#999;letter-spacing:.08em;text-transform:uppercase;">DELITO</div>'+
+          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;color:'+BC[cat]+';text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+del2+'</div></div>'+
+      '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:#999;letter-spacing:.08em;text-transform:uppercase;">DOMICILIO</div>'+
+          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:11px;color:#222;white-space:normal;line-height:1.3;word-break:break-word;">'+dom+'</div></div>'+
     '</div>'+
-    '<button onclick="(function(e){e.stopPropagation();CID='+r.id+';editar();})(event)" style="display:none;width:100%;margin-top:6px;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.3);color:#00c8ff;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:7px 4px;cursor:pointer;border-radius:2px;">EDITAR</button>';
-  return d;
+    // Badge categoría
+    '<div style="margin-top:5px;text-align:center;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:11px;letter-spacing:.2em;color:'+BC[cat]+';">'+BL[cat]+'</div>';
+  wrap.appendChild(info);
+
+  // Botón editar
+  var btn=document.createElement('button');
+  btn.textContent='EDITAR';
+  btn.style.cssText='display:none;width:100%;margin:5px 0 4px;background:'+BC[cat]+';border:none;color:#fff;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:6px 4px;cursor:pointer;border-radius:2px;';
+  btn.onclick=function(e){e.stopPropagation();CID=r.id;editar();};
+  wrap.appendChild(btn);
+
+  return wrap;
 }
 
-function _activarCard(cards, idx){
+function _layoutCards(){
+  var outer=document.getElementById('carousel-outer');
+  if(!outer)return;
+  var cards=Array.from(outer.querySelectorAll('[data-cat]'));
+  var n=cards.length; if(!n)return;
+  var outerW=outer.offsetWidth;
+  // Ancho de la card activa
+  var W=Math.min(outerW*0.68, 260);
+  // Altura foto: proporción 3:4
+  var H=Math.round(W*1.33);
+
   cards.forEach(function(c,i){
-    var info=c.querySelector('.wc-info'), btn=c.querySelector('button');
-    if(i===idx){
-      c.style.opacity='1'; c.style.filter='none';
+    var diff=i-_carIdx;
+    // Circular
+    if(diff > n/2) diff -= n;
+    if(diff < -n/2) diff += n;
+    var absDiff=Math.abs(diff);
+
+    // Foto height
+    var fotoEl=c.querySelector('div');
+    if(fotoEl) fotoEl.style.height=H+'px';
+
+    c.style.width=W+'px';
+    c.style.marginLeft=(-W/2)+'px'; // centrar en left:50%
+
+    if(absDiff===0){
+      // Card activa — frontal, centrada
+      c.style.transform='translateX(0) scale(1) rotate(0deg)';
+      c.style.zIndex='10';
+      c.style.opacity='1';
+      c.style.filter='none';
+      c.style.pointerEvents='auto';
+      var info=c.querySelector('.wc-info'), btn=c.querySelector('button');
       if(info) info.style.display='block';
       if(btn)  btn.style.display='block';
+    } else if(absDiff===1){
+      // Cards laterales — detrás, rotadas
+      var sign=diff>0?1:-1;
+      c.style.transform='translateX('+sign*Math.round(W*0.28)+'px) scale(.82) rotate('+sign*6+'deg)';
+      c.style.zIndex='5';
+      c.style.opacity='.6';
+      c.style.filter='brightness(.7)';
+      c.style.pointerEvents='none';
+      var info=c.querySelector('.wc-info'), btn=c.querySelector('button');
+      if(info) info.style.display='none';
+      if(btn)  btn.style.display='none';
     } else {
-      c.style.opacity='.32'; c.style.filter='brightness(.32) blur(1px)';
+      c.style.opacity='0';
+      c.style.zIndex='1';
+      c.style.pointerEvents='none';
+      var info=c.querySelector('.wc-info'), btn=c.querySelector('button');
       if(info) info.style.display='none';
       if(btn)  btn.style.display='none';
     }
   });
-}
 
-function _centrarCard(idx, animate){
-  var track=document.getElementById('car-track');
-  var outer=document.getElementById('carousel-outer');
-  if(!track||!outer) return;
-  var cards=track.querySelectorAll('[data-cat]');
-  if(!cards[idx]) return;
-  var outerW=outer.offsetWidth;
-  var cardW=cards[idx].offsetWidth||260;
-  var gap=12;
-  var offset=0;
-  for(var i=0;i<idx;i++) offset+=(cards[i]?cards[i].offsetWidth:cardW)+gap;
-  var tx=offset-(outerW-cardW)/2;
-  if(tx<0)tx=0;
-  track.style.transition=animate?'transform .35s cubic-bezier(.4,0,.2,1)':'none';
-  track.style.transform='translateX(-'+tx+'px)';
+  // Ajustar altura del outer a la card activa
+  var activeH = H + 120; // foto + datos polaroid + botón
+  outer.style.height=activeH+'px';
 }
 
 function renderCarousel(data){
@@ -2667,24 +2735,8 @@ function renderCarousel(data){
   var dotsEl=document.getElementById('car-dots');
   if(!outer||!dotsEl) return;
 
-  // Calcular ancho de card según pantalla
-  var vw=window.innerWidth;
-  var cw=Math.min(Math.max(vw*0.72,200),300);
-  outer.style.setProperty('--cw', cw+'px');
-  // Inyectar la CSS var en el outer para que las cards la hereden
-  outer.style.cssText='position:relative;width:100%;overflow:hidden;--cw:'+cw+'px;';
-
-  // Crear track si no existe
-  var track=document.getElementById('car-track');
-  if(!track){
-    track=document.createElement('div');
-    track.id='car-track';
-    track.style.cssText='display:flex;gap:12px;align-items:flex-start;will-change:transform;padding:0 '+Math.round((vw-cw)/2)+'px;';
-    outer.appendChild(track);
-  } else {
-    track.innerHTML='';
-    track.style.padding='0 '+Math.round((vw-cw)/2)+'px;';
-  }
+  outer.style.cssText='position:relative;width:100%;overflow:visible;';
+  outer.innerHTML='';
   dotsEl.innerHTML='';
 
   var ord={PROFUGO:0,CAPTURA:1,SINPEDIDO:2,DETENIDO:3};
@@ -2692,7 +2744,7 @@ function renderCarousel(data){
   if(!_carItems.length) return;
 
   _carItems.forEach(function(r,i){
-    track.appendChild(mkWCard(r));
+    outer.appendChild(mkWCard(r));
     var dot=document.createElement('div');
     dot.className='car-dot'+(i===0?' act':'');
     dot.onclick=(function(idx){return function(){carGoTo(idx);};})(i);
@@ -2700,11 +2752,11 @@ function renderCarousel(data){
   });
 
   _carIdx=0;
-  requestAnimationFrame(function(){requestAnimationFrame(function(){
-    var cards=track.querySelectorAll('[data-cat]');
-    _activarCard(cards,0);
-    _centrarCard(0,false);
-  });});
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      _layoutCards();
+    });
+  });
   _initSwipe(outer);
 }
 
@@ -2717,12 +2769,10 @@ function carMove(dir){
 function carGoTo(idx){
   var n=_carItems.length; if(!n)return;
   _carIdx=((idx%n)+n)%n;
-  var track=document.getElementById('car-track');
-  if(!track)return;
-  var cards=track.querySelectorAll('[data-cat]');
-  _activarCard(cards,_carIdx);
-  _centrarCard(_carIdx,true);
-  document.querySelectorAll('.car-dot').forEach(function(d,i){d.className='car-dot'+(i===_carIdx?' act':'');});
+  _layoutCards();
+  document.querySelectorAll('.car-dot').forEach(function(d,i){
+    d.className='car-dot'+(i===_carIdx?' act':'');
+  });
 }
 
 function _initSwipe(el){
@@ -2736,7 +2786,6 @@ function _initSwipe(el){
   el.addEventListener('touchend',function(e){
     if(!_swipeLock&&Math.abs(e.changedTouches[0].clientX-_swipeX)>40)carMove(e.changedTouches[0].clientX<_swipeX?1:-1);
   },{passive:true});
-  // Mouse drag PC
   var mDown=false,mX=0,mMoved=false;
   el.addEventListener('mousedown',function(e){mDown=true;mX=e.clientX;mMoved=false;el.style.cursor='grabbing';});
   window.addEventListener('mousemove',function(e){if(!mDown)return;if(Math.abs(e.clientX-mX)>6)mMoved=true;});
