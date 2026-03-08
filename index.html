@@ -1061,72 +1061,71 @@ input,select,textarea{font-family:var(--ui)}
   <div class="mscroll" id="mscroll">
 
     <!-- BUSCAR -->
-    <div id="pb" style="height:100%;display:flex;flex-direction:column;overflow:hidden;">
+    <div id="pb" style="display:flex;flex-direction:column;height:100%;overflow-y:auto;overflow-x:hidden;">
 
       <!-- ENCABEZADO -->
-      <div style="flex-shrink:0;padding:10px 14px 0;">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#00c8ff;letter-spacing:.18em;text-transform:uppercase;opacity:.5;">&#9632; REGISTRO ACTIVO &nbsp;&bull;&nbsp; DIV. DELITOS TELEMATICOS &nbsp;&bull;&nbsp; TUCUMAN</div>
+      <div style="flex-shrink:0;padding:8px 14px 0;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#00c8ff;letter-spacing:.15em;text-transform:uppercase;opacity:.5;">&#9632; REGISTRO ACTIVO &bull; DIV. DELITOS TELEMATICOS &bull; TUCUMAN</div>
       </div>
 
-      <!-- CARRUSEL -->
-      <div style="flex-shrink:0;padding:10px 0 0;position:relative;z-index:1;">
-        <div id="carousel-outer" style="position:relative;width:100%;height:clamp(320px,80vw,460px);overflow:visible;"></div>
-        <div style="display:flex;justify-content:center;align-items:center;gap:16px;padding:8px 0 0;">
-          <button onclick="carMove(-1)" style="width:40px;height:40px;border-radius:50%;background:rgba(5,10,18,.92);border:1.5px solid rgba(0,200,255,.45);color:#00c8ff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background='rgba(0,200,255,.18)'" onmouseout="this.style.background='rgba(5,10,18,.92)'">&#8249;</button>
+      <!-- CARRUSEL — altura fija, no se superpone -->
+      <div style="flex-shrink:0;width:100%;padding:10px 0 0;position:relative;">
+        <div id="carousel-outer" style="position:relative;width:100%;height:clamp(300px,75vw,440px);overflow:hidden;"></div>
+        <div style="display:flex;justify-content:center;align-items:center;gap:14px;padding:8px 0 0;">
+          <button onclick="carMove(-1)" style="width:40px;height:40px;border-radius:50%;background:rgba(5,10,18,.92);border:1.5px solid rgba(0,200,255,.4);color:#00c8ff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#8249;</button>
           <div id="car-dots" style="display:flex;gap:6px;align-items:center;"></div>
-          <button onclick="carMove(1)" style="width:40px;height:40px;border-radius:50%;background:rgba(5,10,18,.92);border:1.5px solid rgba(0,200,255,.45);color:#00c8ff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background='rgba(0,200,255,.18)'" onmouseout="this.style.background='rgba(5,10,18,.92)'">&#8250;</button>
+          <button onclick="carMove(1)" style="width:40px;height:40px;border-radius:50%;background:rgba(5,10,18,.92);border:1.5px solid rgba(0,200,255,.4);color:#00c8ff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#8250;</button>
         </div>
       </div>
 
-      <!-- BUSCADOR — siempre fijo debajo del carrusel -->
+      <!-- BUSCADOR — siempre visible, debajo del carrusel -->
       <div style="flex-shrink:0;padding:10px 14px 0;">
-        <div style="display:flex;gap:8px;align-items:center;background:#0d1525;border:1px solid rgba(0,200,255,.25);border-radius:6px;padding:0 10px;">
-          <span style="color:rgba(0,200,255,.5);font-size:16px;">&#9906;</span>
-          <input id="q" type="search" placeholder="Buscar por nombre o DNI..."
+        <div style="display:flex;gap:8px;align-items:center;background:#0d1525;border:1px solid rgba(0,200,255,.3);border-radius:6px;padding:4px 10px;">
+          <span style="color:rgba(0,200,255,.5);font-size:15px;">&#9906;</span>
+          <input id="q" type="search" placeholder="Buscar nombre o DNI..."
             autocomplete="off" spellcheck="false"
             oninput="onBuscarInput(this.value)"
-            style="flex:1;background:none;border:none;outline:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:13px;padding:11px 0;">
-          <button id="btn-clear" onclick="limpQ()" style="display:none;background:none;border:none;color:rgba(0,200,255,.6);font-size:14px;cursor:pointer;padding:4px;">✕</button>
-          <button onclick="onBuscarInput(document.getElementById('q').value)" style="background:rgba(0,200,255,.12);border:1px solid rgba(0,200,255,.3);color:#00c8ff;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.1em;padding:6px 12px;cursor:pointer;border-radius:4px;">BUSCAR</button>
+            style="flex:1;background:none;border:none;outline:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:13px;padding:9px 0;">
+          <button id="btn-clear" onclick="limpQ()" style="display:none;background:none;border:none;color:rgba(255,100,100,.7);font-size:16px;cursor:pointer;padding:4px 2px;">&#10005;</button>
+          <button onclick="onBuscarInput(document.getElementById('q').value||'__TODOS__')" style="background:rgba(0,200,255,.12);border:1px solid rgba(0,200,255,.3);color:#00c8ff;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.1em;padding:7px 12px;cursor:pointer;border-radius:4px;flex-shrink:0;">BUSCAR</button>
         </div>
       </div>
 
-      <!-- 4 RECUADROS — siempre fijos -->
+      <!-- 4 RECUADROS — siempre visibles -->
       <div style="flex-shrink:0;padding:10px 14px 0;">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
-          <div onclick="abrirLista('PROFUGO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(204,14,34,.3);border-top:3px solid #cc0e22;border-radius:5px;padding:10px 4px 8px;text-align:center;transition:background .15s;" onmouseover="this.style.background='rgba(204,14,34,.12)'" onmouseout="this.style.background='#0d1525'">
+          <div onclick="abrirLista('PROFUGO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(204,14,34,.3);border-top:3px solid #cc0e22;border-radius:5px;padding:10px 4px 8px;text-align:center;">
             <div id="sp" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(20px,5.5vw,30px);color:#cc0e22;line-height:1;">0</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.6vw,8px);color:rgba(204,14,34,.7);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;">PROFUGOS</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.5vw,8px);color:rgba(204,14,34,.7);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;">PROFUGOS</div>
           </div>
-          <div onclick="abrirLista('CAPTURA')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(224,112,0,.3);border-top:3px solid #e07000;border-radius:5px;padding:10px 4px 8px;text-align:center;transition:background .15s;" onmouseover="this.style.background='rgba(224,112,0,.12)'" onmouseout="this.style.background='#0d1525'">
+          <div onclick="abrirLista('CAPTURA')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(224,112,0,.3);border-top:3px solid #e07000;border-radius:5px;padding:10px 4px 8px;text-align:center;">
             <div id="sc" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(20px,5.5vw,30px);color:#e07000;line-height:1;">0</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.6vw,8px);color:rgba(224,112,0,.7);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;">PEDIDOS</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.5vw,8px);color:rgba(224,112,0,.7);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;">PEDIDOS</div>
           </div>
-          <div onclick="abrirLista('DETENIDO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(5,150,105,.3);border-top:3px solid #059669;border-radius:5px;padding:10px 4px 8px;text-align:center;transition:background .15s;" onmouseover="this.style.background='rgba(5,150,105,.12)'" onmouseout="this.style.background='#0d1525'">
+          <div onclick="abrirLista('DETENIDO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(5,150,105,.3);border-top:3px solid #059669;border-radius:5px;padding:10px 4px 8px;text-align:center;">
             <div id="sd" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(20px,5.5vw,30px);color:#059669;line-height:1;">0</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.6vw,8px);color:rgba(5,150,105,.7);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;">DETENIDOS</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.5vw,8px);color:rgba(5,150,105,.7);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;">DETENIDOS</div>
           </div>
-          <div onclick="abrirLista('SINPEDIDO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(124,58,237,.3);border-top:3px solid #7c3aed;border-radius:5px;padding:10px 4px 8px;text-align:center;transition:background .15s;" onmouseover="this.style.background='rgba(124,58,237,.12)'" onmouseout="this.style.background='#0d1525'">
+          <div onclick="abrirLista('SINPEDIDO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(124,58,237,.3);border-top:3px solid #7c3aed;border-radius:5px;padding:10px 4px 8px;text-align:center;">
             <div id="ss" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(20px,5.5vw,30px);color:#7c3aed;line-height:1;">0</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.6vw,8px);color:rgba(124,58,237,.7);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;">SIN PEDIDO</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.5vw,8px);color:rgba(124,58,237,.7);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;">SIN PEDIDO</div>
           </div>
         </div>
       </div>
 
-      <!-- PANEL LISTADO — oculto por defecto, se abre al tocar recuadro o buscar -->
-      <div id="panel-lista" style="display:none;flex:1;flex-direction:column;min-height:0;overflow:hidden;margin-top:8px;">
-        <!-- Filtros -->
-        <div style="flex-shrink:0;padding:0 14px 6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-          <button class="ff act" data-f="" onclick="setF(this)" style="flex:1;">TODOS</button>
-          <button class="ff" data-f="PROFUGO"   onclick="setF(this)" style="flex:1;">PROFUGOS</button>
-          <button class="ff" data-f="CAPTURA"   onclick="setF(this)" style="flex:1;">PEDIDOS</button>
-          <button class="ff" data-f="SINPEDIDO" onclick="setF(this)" style="flex:1;">SIN PEDIDO</button>
-          <button class="ff" data-f="DETENIDO"  onclick="setF(this)" style="flex:1;">DETENIDOS</button>
-          <button onclick="cerrarLista()" style="background:rgba(255,50,70,.1);border:1px solid rgba(255,50,70,.3);color:rgba(255,100,100,.8);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.1em;padding:5px 10px;cursor:pointer;border-radius:3px;">✕</button>
+      <!-- LISTADO — oculto por defecto, aparece al tocar recuadro o buscar -->
+      <div id="panel-lista" style="display:none;flex-direction:column;padding:8px 14px 60px;">
+        <!-- Filtros + cerrar -->
+        <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;padding:8px 0 6px;">
+          <button class="ff act" data-f="" onclick="setF(this)">TODOS</button>
+          <button class="ff" data-f="PROFUGO"   onclick="setF(this)">PROFUGOS</button>
+          <button class="ff" data-f="CAPTURA"   onclick="setF(this)">PEDIDOS</button>
+          <button class="ff" data-f="SINPEDIDO" onclick="setF(this)">SIN PEDIDO</button>
+          <button class="ff" data-f="DETENIDO"  onclick="setF(this)">DETENIDOS</button>
+          <button onclick="cerrarLista()" style="margin-left:auto;background:rgba(255,50,70,.1);border:1px solid rgba(255,80,80,.3);color:rgba(255,100,100,.8);font-family:'Share Tech Mono',monospace;font-size:10px;padding:5px 12px;cursor:pointer;border-radius:3px;">&#10005; CERRAR</button>
         </div>
-        <!-- Lista scrollable -->
-        <div class="lista" id="lista" style="flex:1;overflow-y:auto;padding:0 14px 10px;">
-        </div>
+        <!-- Lista -->
+        <div id="lista"></div>
       </div>
 
     </div>
@@ -1408,7 +1407,7 @@ function doLogin(){
   document.getElementById('scr-login').classList.add('gone');
   document.getElementById('app').classList.add('on');
   document.getElementById('pb').style.display='flex';
-  var _pl2=document.getElementById('panel-lista');if(_pl2)_pl2.style.display='none';
+  var _ply=document.getElementById('panel-lista');if(_ply)_ply.style.display='none';
   if(DB && DB.length > 0){ setTimeout(function(){ renderCarousel(DB); }, 100); }
   var ini=nom[0].toUpperCase();
   ['u-av','m-av'].forEach(function(id){document.getElementById(id).textContent=ini;});
@@ -1455,7 +1454,7 @@ function ir(id){
     setTimeout(function(){var q=document.getElementById('q');if(q)q.focus();},120);
   } else {
     document.getElementById('pb').style.display='none';
-    var _pl=document.getElementById('panel-lista');if(_pl)_pl.style.display='none';
+    var _plx=document.getElementById('panel-lista');if(_plx)_plx.style.display='none';
     var e=document.getElementById('pant-'+id);if(e)e.classList.add('on');
   }
   if(id==='sync')renderSync();
@@ -1473,14 +1472,14 @@ function updateStats(){
 
 /* BUSQUEDA */
 function onBuscarInput(val){
-  document.getElementById('btn-clear').style.display=val?'flex':'none';
-  if(val){
-    // Al buscar: abrir listado sin filtro de categoría
-    FIL='';
-    document.querySelectorAll('.ff').forEach(function(b){b.classList.toggle('act',b.dataset.f==='');});
-    var p=document.getElementById('panel-lista');
-    if(p){p.style.display='flex';p.style.flexDirection='column';}
-  }
+  var isAll = (val==='__TODOS__');
+  var realVal = isAll ? '' : val;
+  document.getElementById('btn-clear').style.display=realVal?'flex':'none';
+  var qEl=document.getElementById('q'); if(qEl&&isAll) qEl.value='';
+  if(isAll) FIL='';
+  document.querySelectorAll('.ff').forEach(function(b){b.classList.toggle('act',b.dataset.f===FIL);});
+  var p=document.getElementById('panel-lista');
+  if(p){p.style.display='flex';p.style.flexDirection='column';}
   buscar();
 }
 function mostrarLista(){
@@ -1490,21 +1489,22 @@ function mostrarLista(){
 }
 function abrirLista(cat){
   FIL=cat;
-  document.querySelectorAll('.ff').forEach(function(b){
-    b.classList.toggle('act', b.dataset.f===cat);
-  });
+  document.querySelectorAll('.ff').forEach(function(b){b.classList.toggle('act',b.dataset.f===cat);});
   var p=document.getElementById('panel-lista');
   if(p){p.style.display='flex';p.style.flexDirection='column';}
-  // Limpiar buscador
-  var q=document.getElementById('q'); if(q) q.value='';
+  var q=document.getElementById('q');if(q)q.value='';
   document.getElementById('btn-clear').style.display='none';
   buscar();
+  // Scroll al listado
+  setTimeout(function(){
+    var pl=document.getElementById('panel-lista');
+    if(pl) pl.scrollIntoView({behavior:'smooth',block:'start'});
+  },100);
 }
 function cerrarLista(){
   FIL='';
-  var p=document.getElementById('panel-lista');
-  if(p) p.style.display='none';
-  var q=document.getElementById('q'); if(q) q.value='';
+  var p=document.getElementById('panel-lista');if(p)p.style.display='none';
+  var q=document.getElementById('q');if(q)q.value='';
   document.getElementById('btn-clear').style.display='none';
 }
 function setF(btn){FIL=btn.dataset.f;document.querySelectorAll('.ff').forEach(function(b){b.classList.toggle('act',b===btn);});buscar();}
@@ -2209,6 +2209,7 @@ function _layoutCards(){
       c.style.opacity='0';
       c.style.pointerEvents='none';
       c.style.zIndex='0';
+      c.style.opacity='0';
       return;
     }
 
