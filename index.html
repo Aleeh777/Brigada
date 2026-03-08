@@ -1103,6 +1103,7 @@ input,select,textarea{font-family:var(--ui)}
         </div>
       </div>
 
+      <div id="panel-busqueda" style="display:none;flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;">
       <!-- Divisor -->
       <div style="flex-shrink:0;margin:clamp(10px,2.5vw,14px) clamp(16px,4vw,24px) 0;border-top:1px dashed rgba(0,200,255,.18);"></div>
 
@@ -1321,6 +1322,7 @@ input,select,textarea{font-family:var(--ui)}
           <div style="display:flex;align-items:center;gap:11px">Admin: <span id="sh-admin" style="color:var(--ambar);letter-spacing:.12em">------</span><button onclick="toggleClave('sh-admin','admin')" style="color:var(--dim2);font-size:var(--f9);text-decoration:underline;cursor:pointer">ver / ocultar</button></div>
         </div>
       </div>
+      </div><!-- /panel-busqueda -->
     </div>
 
   </div><!-- /mscroll -->
@@ -1599,6 +1601,7 @@ function doLogin(){
   if(SC&&ONLINE)SB.insert('accesos',acc).then(function(){});
   document.getElementById('scr-login').classList.add('gone');
   document.getElementById('app').classList.add('on');
+    var _pb2=document.getElementById('panel-busqueda');if(_pb2)_pb2.style.display='none';
   if(DB && DB.length > 0){ setTimeout(function(){ renderCarousel(DB); }, 100); }
   var ini=nom[0].toUpperCase();
   ['u-av','m-av'].forEach(function(id){document.getElementById(id).textContent=ini;});
@@ -1640,8 +1643,16 @@ function ir(id){
   });
   document.querySelectorAll('.bn').forEach(function(b,i){b.classList.toggle('act',i===NI[id]);});
   document.getElementById('mscroll').scrollTop=0;
-  if(id==='buscar')document.getElementById('pb').style.display='flex';
-  else{var e=document.getElementById('pant-'+id);if(e)e.classList.add('on');}
+  var pbEl=document.getElementById('pb');
+  var pBus=document.getElementById('panel-busqueda');
+  if(id==='buscar'){
+    if(pbEl) pbEl.style.display='flex';
+    if(pBus) pBus.style.display='flex';
+    setTimeout(function(){var q=document.getElementById('q');if(q)q.focus();},120);
+  } else {
+    if(pBus) pBus.style.display='none';
+    var e=document.getElementById('pant-'+id);if(e)e.classList.add('on');
+  }
   if(id==='sync')renderSync();
   if(id==='accesos')renderAcc();
   pushState(id);
