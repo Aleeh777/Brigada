@@ -1413,8 +1413,9 @@ input,select,textarea{font-family:var(--ui)}
     <div class="adv-tit">Advertencia &mdash; Uso Restringido</div>
     <div class="adv-txt">
       Esta pagina es totalmente privada y solo de uso de las fuerzas de la Brigada de Investigaciones.
-      Cualquier dato a compartir o permitir el ingreso a individuos no correspondientes corre el riesgo
-      de una sancion disciplinaria. Recuerden: cada dato ingresado queda registrado.
+      Cualquier dato a compartir o permitir el ingreso a individuos no correspondientes
+      corre el riesgo de una sancion disciplinaria.
+      Recuerden: cada dato ingresado queda registrado.
     </div>
     <label class="adv-check">
       <input type="checkbox" id="adv-cb" onchange="document.getElementById('adv-btn').classList.toggle('activo',this.checked)">
@@ -2505,23 +2506,15 @@ function limpiarSesActiva(){
   try{sessionStorage.removeItem(_SES_DAT);}catch(e){}
 }
 function restaurarSes(){
-  var min=getSesMin();
   var raw=null;
   try{raw=localStorage.getItem(_SES_DAT);}catch(e){}
-  if(!raw){try{raw=sessionStorage.getItem(_SES_DAT);}catch(e){}}
   if(!raw)return false;
   var d;try{d=JSON.parse(raw);}catch(e){return false;}
   if(!d||!d.usr)return false;
-  // Verificar expiración SOLO si hay tiempo configurado Y el exp es futuro real
-  if(min>0&&d.exp&&d.exp>0&&Date.now()>d.exp){
-    // Expiró por inactividad real — cerrar sesión
-    limpiarSesActiva();return false;
-  }
-  // Renovar exp siempre al restaurar (actualizar página = actividad)
+  // Renovar exp desde ahora — actualizar página no es inactividad
+  var min=getSesMin();
   d.exp=min>0?Date.now()+min*60000:0;
-  var s=JSON.stringify(d);
-  try{localStorage.setItem(_SES_DAT,s);}catch(e){}
-  try{sessionStorage.setItem(_SES_DAT,s);}catch(e){}
+  try{localStorage.setItem(_SES_DAT,JSON.stringify(d));}catch(e){}
   USR={nombre:d.usr,cargo:d.cargo,ts:d.ts};
   return true;
 }
@@ -2580,8 +2573,22 @@ function guardarConfigSesion(){
 ============================================================= */
 function mostrarAdvertencia(nom){
   var k=_ADV_PFX+nom.toLowerCase().replace(/\s+/g,'_');
+  // Mostrar solo 1 vez por usuario (por dispositivo)
+  if(localStorage.getItem(k)==='1')return;
   var el=document.getElementById('mod-adv');
-  if(el){el.dataset.advk=k;el.classList.add('open');}
+  if(!el)return;
+  // Personalizar con nombre y cargo
+  var usr=USR||{nombre:nom,cargo:''};
+  var subtit=el.querySelector('.adv-sub');
+  if(!subtit){subtit=document.createElement('div');subtit.className='adv-sub';
+    subtit.style.cssText='font-family:var(--mono);font-size:var(--f9);color:var(--cyan);text-align:center;margin-bottom:12px;letter-spacing:.08em;';
+    var tit=el.querySelector('.adv-tit');
+    if(tit)tit.insertAdjacentElement('afterend',subtit);
+  }
+  subtit.textContent=nom+(usr.cargo?' — '+usr.cargo:'');
+  el.dataset.advk=k;
+  el.style.display='flex';
+  el.classList.add('open');
 }
 function cerrarAdvertencia(){
   if(!document.getElementById('adv-cb').checked)return;
