@@ -1414,8 +1414,7 @@ input,select,textarea{font-family:var(--ui)}
     <div class="adv-txt">
       Esta pagina es totalmente privada y solo de uso de las fuerzas de la Brigada de Investigaciones.
       Cualquier dato a compartir o permitir el ingreso a individuos no correspondientes
-      corre el riesgo de una sancion disciplinaria.
-      Recuerden: cada dato ingresado queda registrado.
+      corre el riesgo de una sancion disciplinaria. Recuerden: cada dato ingresado queda registrado.
     </div>
     <label class="adv-check">
       <input type="checkbox" id="adv-cb" onchange="document.getElementById('adv-btn').classList.toggle('activo',this.checked)">
@@ -2572,32 +2571,37 @@ function guardarConfigSesion(){
    ADVERTENCIA (1 vez por usuario)
 ============================================================= */
 function mostrarAdvertencia(nom){
-  var k=_ADV_PFX+nom.toLowerCase().replace(/\s+/g,'_');
-  // Mostrar solo 1 vez por usuario (por dispositivo)
-  if(localStorage.getItem(k)==='1')return;
+  // Siempre mostrar al hacer login manual
+  _mostrarAdvUI(nom);
+}
+function mostrarAdvertenciaRestore(){
+  // NO mostrar al restaurar sesión — el usuario ya la vio
+}
+function _mostrarAdvUI(nom){
   var el=document.getElementById('mod-adv');
   if(!el)return;
-  // Personalizar con nombre y cargo
   var usr=USR||{nombre:nom,cargo:''};
-  var subtit=el.querySelector('.adv-sub');
-  if(!subtit){subtit=document.createElement('div');subtit.className='adv-sub';
-    subtit.style.cssText='font-family:var(--mono);font-size:var(--f9);color:var(--cyan);text-align:center;margin-bottom:12px;letter-spacing:.08em;';
+  // Inyectar nombre/cargo en el modal
+  var sub=el.querySelector('.adv-sub');
+  if(!sub){
+    sub=document.createElement('div');
+    sub.className='adv-sub';
+    sub.style.cssText='font-family:var(--mono);font-size:11px;color:#00c8ff;text-align:center;margin:-4px 0 14px;letter-spacing:.06em;';
     var tit=el.querySelector('.adv-tit');
-    if(tit)tit.insertAdjacentElement('afterend',subtit);
+    if(tit)tit.insertAdjacentElement('afterend',sub);
   }
-  subtit.textContent=nom+(usr.cargo?' — '+usr.cargo:'');
-  el.dataset.advk=k;
-  el.style.display='flex';
+  sub.textContent=nom.toUpperCase()+(usr.cargo?' — '+usr.cargo.toUpperCase():'');
+  el.dataset.advk='adv_'+nom.toLowerCase().replace(/\s+/g,'_');
+  el.style.cssText='display:flex;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);';
   el.classList.add('open');
 }
 function cerrarAdvertencia(){
   if(!document.getElementById('adv-cb').checked)return;
   var el=document.getElementById('mod-adv');
-  var k=el?el.dataset.advk:'';
-  if(k)localStorage.setItem(k,'1');
-  if(el)el.classList.remove('open');
+  if(el){el.classList.remove('open');el.style.display='none';}
   document.getElementById('adv-cb').checked=false;
-  document.getElementById('adv-btn').classList.remove('activo');
+  var btn=document.getElementById('adv-btn');
+  if(btn)btn.classList.remove('activo');
 }
 
 /* =============================================================
@@ -2662,7 +2666,7 @@ if(restaurarSes()){
   document.getElementById('app').classList.add('on');
   actualizarBarraSesion();iniciarTimerSesion();iniciarPolling();
   pushState('buscar');initSupa();
-  mostrarAdvertencia(USR.nombre);
+  mostrarAdvertenciaRestore();
 }
 // verClave unificada — ver función verClave() arriba
 
