@@ -1452,8 +1452,8 @@ input,select,textarea{font-family:var(--ui)}
 /* CONFIG */
 var SUPA_URL='https://lfagyfcxsscwuwcubuyc.supabase.co';
 var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmYWd5ZmN4c3Njd3V3Y3VidXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NDQ1MjcsImV4cCI6MjA4ODEyMDUyN30.knZSwrCNm4_wlK9GZbg8_Rizc_cUh6fxqzo4_5c_fpU';
-function getCL(){return localStorage.getItem('scp_cl')||'979005';}
-function getCA(){return localStorage.getItem('scp_ca')||'979005';}
+function getCL(){return localStorage.getItem('scp_cl')||'9790';}
+function getCA(){return localStorage.getItem('scp_ca')||'9790';}
 
 var KDB='scp_db',KFT='scp_ft',KACC='scp_acc',KSYNC='scp_sync';
 var DB=[],FT={},ACC=[],USR=null,CID=null,EID=null;
@@ -1472,6 +1472,15 @@ function sbReq(method,path,body,xh){
     return r.text().then(function(t){var d;try{d=JSON.parse(t);}catch(e){d=t;}return{ok:r.ok,status:r.status,data:d};});
   })
   .catch(function(e){return{ok:false,status:0,data:null,error:e.message};});
+}
+function syncClaves(){
+  if(!SC)return;
+  sbReq('GET',SUPA_URL+'/rest/v1/config?select=key,value',null,null).then(function(res){
+    if(res.error||!Array.isArray(res.data))return;
+    res.data.forEach(function(row){
+      if(row.key==='scp_cl'||row.key==='scp_ca') localStorage.setItem(row.key,row.value);
+    });
+  }).catch(function(){});
 }
 var SB={
   select:function(t){return sbReq('GET',t+'?order=id').then(function(r){
@@ -1499,6 +1508,7 @@ function initSupa(){
   sbReq('GET','registros?select=id&limit=1').then(function(r){
     if(r.ok){
       SC=true;
+      syncClaves();
       SB.select('registros').then(function(res){
         if(res.error||!res.data)return;
         DB=res.data.map(function(x){return Object.assign({},x,{hist:tryJ(x.hist,[]),fotos:undefined});});
@@ -1894,8 +1904,9 @@ function cambiarLogin(){
   if(n.length<4){toast('Minimo 4 caracteres','err');return;}
   if(n!==c){toast('Las claves no coinciden','err');return;}
   localStorage.setItem('scp_cl',n);
+  if(SC&&window.navigator.onLine){sbReq('POST',SUPA_URL+'/rest/v1/config',{key:'scp_cl',value:n},{'Prefer':'resolution=merge-duplicates'}).catch(function(){});}
   document.getElementById('g-ln').value='';document.getElementById('g-lc').value='';
-  toast('Clave de login actualizada','ok');
+  toast('Clave actualizada en todos los dispositivos','ok');
 }
 function cambiarAdmin(){
   var n=document.getElementById('g-an').value,c=document.getElementById('g-ac').value;
@@ -1903,8 +1914,9 @@ function cambiarAdmin(){
   if(n.length<4){toast('Minimo 4 caracteres','err');return;}
   if(n!==c){toast('Las claves no coinciden','err');return;}
   localStorage.setItem('scp_ca',n);
+  if(SC&&window.navigator.onLine){sbReq('POST',SUPA_URL+'/rest/v1/config',{key:'scp_ca',value:n},{'Prefer':'resolution=merge-duplicates'}).catch(function(){});}
   document.getElementById('g-an').value='';document.getElementById('g-ac').value='';
-  toast('Clave de admin actualizada','ok');
+  toast('Clave actualizada en todos los dispositivos','ok');
 }
 function toggleClave(elId,tipo){
   var el=document.getElementById(elId);
