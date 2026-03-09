@@ -2065,10 +2065,20 @@ function editarMovil(){
   var secCampos=document.createElement('div');
   secCampos.style.cssText='padding:8px 16px 100px;';
   var campos=[
-    ['NOMBRE *','em-nom',r.nombre||''],['DNI','em-dni',r.dni||''],
-    ['ALIAS / APODO','em-ali',r.alias||''],['DOMICILIO','em-dom',r.dom||''],
-    ['DELITO','em-del',r.delito||''],['CAUSA JUDICIAL','em-cau',r.causa||''],
-    ['DESCRIPCION','em-des',r.des||''],['OBSERVACION','em-obs',r.obs||''],
+    ['NOMBRE *','em-nom',r.nombre||''],
+    ['DNI','em-dni',r.dni||''],
+    ['ALIAS / APODO','em-ali',r.alias||''],
+    ['FECHA DE NACIMIENTO','em-fnac',r.fnac||''],
+    ['EDAD','em-age2',r.edad||''],
+    ['DOMICILIO','em-dom',r.dom||''],
+    ['DELITO','em-del',r.delito||''],
+    ['CAUSA JUDICIAL','em-cau',r.causa||''],
+    ['JUZGADO','em-juz',r.juz||''],
+    ['VEHICULO','em-veh',r.veh||''],
+    ['FAMILIAR / CONTACTO','em-fam',r.fam||''],
+    ['DESCRIPCION FISICA','em-des',r.des||''],
+    ['MOTIVO','em-mot',r.motivo||''],
+    ['OBSERVACION','em-obs',r.obs||''],
     ['AGENTE RESPONSABLE *','em-age',r.agente||'']
   ];
   campos.forEach(function(c){
@@ -2096,9 +2106,10 @@ function guardarEdicionMovil(){
   if(!r){toast('Registro no encontrado','err');return;}
   var datos={
     tipo:window.EIT_TIPO||r.tipo,
-    nombre:nombre, dni:g('em-dni'), alias:g('em-ali'), dom:g('em-dom'),
-    delito:g('em-del'), causa:g('em-cau'), des:g('em-des'), obs:g('em-obs'),
-    agente:agente
+    nombre:nombre, dni:g('em-dni'), alias:g('em-ali'), fnac:g('em-fnac'),
+    edad:g('em-age2'), dom:g('em-dom'), delito:g('em-del'), causa:g('em-cau'),
+    juz:g('em-juz'), veh:g('em-veh'), fam:g('em-fam'), des:g('em-des'),
+    motivo:g('em-mot'), obs:g('em-obs'), agente:agente
   };
   Object.assign(r, datos);
   if(!r.hist)r.hist=[];
