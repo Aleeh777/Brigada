@@ -2485,13 +2485,9 @@ function guardarSesActiva(nom,car){
   var min=getSesMin();
   var d={usr:nom,cargo:car,ts:ahora(),exp:min===0?0:Date.now()+min*60000};
   var s=JSON.stringify(d);
-  if(min===0){
-    try{sessionStorage.setItem(_SES_DAT,s);}catch(e){}
-    localStorage.removeItem(_SES_DAT);
-  }else{
-    localStorage.setItem(_SES_DAT,s);
-    try{sessionStorage.setItem(_SES_DAT,s);}catch(e){}
-  }
+  // Guardar SIEMPRE en localStorage para sobrevivir actualizaciones
+  try{localStorage.setItem(_SES_DAT,s);}catch(e){}
+  try{sessionStorage.setItem(_SES_DAT,s);}catch(e){}
 }
 function renovarSes(){
   var min=getSesMin();if(min===0)return;
@@ -2511,12 +2507,21 @@ function limpiarSesActiva(){
 function restaurarSes(){
   var min=getSesMin();
   var raw=null;
-  if(min===0){try{raw=sessionStorage.getItem(_SES_DAT);}catch(e){}}
-  else{try{raw=localStorage.getItem(_SES_DAT)||sessionStorage.getItem(_SES_DAT);}catch(e){}}
+  // Siempre intentar localStorage primero (cubre min>0 y también min=0 como fallback)
+  try{raw=localStorage.getItem(_SES_DAT);}catch(e){}
+  if(!raw){try{raw=sessionStorage.getItem(_SES_DAT);}catch(e){}}
   if(!raw)return false;
   var d;try{d=JSON.parse(raw);}catch(e){return false;}
   if(!d||!d.usr)return false;
-  if(d.exp&&d.exp>0&&Date.now()>d.exp){limpiarSesActiva();return false;}
+  // Solo verificar expiración si min>0 Y el exp fue guardado con tiempo real
+  if(min>0&&d.exp&&d.exp>0&&Date.now()>d.exp){limpiarSesActiva();return false;}
+  // Renovar exp desde ahora (actualizar página no es inactividad)
+  if(min>0){
+    d.exp=Date.now()+min*60000;
+    var s=JSON.stringify(d);
+    try{localStorage.setItem(_SES_DAT,s);}catch(e){}
+    try{sessionStorage.setItem(_SES_DAT,s);}catch(e){}
+  }
   USR={nombre:d.usr,cargo:d.cargo,ts:d.ts};
   return true;
 }
@@ -2651,6 +2656,7 @@ if(restaurarSes()){
   document.getElementById('app').classList.add('on');
   actualizarBarraSesion();iniciarTimerSesion();iniciarPolling();
   pushState('buscar');initSupa();
+  mostrarAdvertencia(USR.nombre);
 }
 // Conectar modal de gestion2 (config sesion) al verificador de clave
 var _origVerClave=verClave;
