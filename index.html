@@ -2507,21 +2507,21 @@ function limpiarSesActiva(){
 function restaurarSes(){
   var min=getSesMin();
   var raw=null;
-  // Siempre intentar localStorage primero (cubre min>0 y también min=0 como fallback)
   try{raw=localStorage.getItem(_SES_DAT);}catch(e){}
   if(!raw){try{raw=sessionStorage.getItem(_SES_DAT);}catch(e){}}
   if(!raw)return false;
   var d;try{d=JSON.parse(raw);}catch(e){return false;}
   if(!d||!d.usr)return false;
-  // Solo verificar expiración si min>0 Y el exp fue guardado con tiempo real
-  if(min>0&&d.exp&&d.exp>0&&Date.now()>d.exp){limpiarSesActiva();return false;}
-  // Renovar exp desde ahora (actualizar página no es inactividad)
-  if(min>0){
-    d.exp=Date.now()+min*60000;
-    var s=JSON.stringify(d);
-    try{localStorage.setItem(_SES_DAT,s);}catch(e){}
-    try{sessionStorage.setItem(_SES_DAT,s);}catch(e){}
+  // Verificar expiración SOLO si hay tiempo configurado Y el exp es futuro real
+  if(min>0&&d.exp&&d.exp>0&&Date.now()>d.exp){
+    // Expiró por inactividad real — cerrar sesión
+    limpiarSesActiva();return false;
   }
+  // Renovar exp siempre al restaurar (actualizar página = actividad)
+  d.exp=min>0?Date.now()+min*60000:0;
+  var s=JSON.stringify(d);
+  try{localStorage.setItem(_SES_DAT,s);}catch(e){}
+  try{sessionStorage.setItem(_SES_DAT,s);}catch(e){}
   USR={nombre:d.usr,cargo:d.cargo,ts:d.ts};
   return true;
 }
@@ -2580,7 +2580,6 @@ function guardarConfigSesion(){
 ============================================================= */
 function mostrarAdvertencia(nom){
   var k=_ADV_PFX+nom.toLowerCase().replace(/\s+/g,'_');
-  if(localStorage.getItem(k))return;
   var el=document.getElementById('mod-adv');
   if(el){el.dataset.advk=k;el.classList.add('open');}
 }
@@ -2658,24 +2657,7 @@ if(restaurarSes()){
   pushState('buscar');initSupa();
   mostrarAdvertencia(USR.nombre);
 }
-// Conectar modal de gestion2 (config sesion) al verificador de clave
-var _origVerClave=verClave;
-verClave=function(){
-  if(document.getElementById('mc-pas').value!==getCA()){
-    document.getElementById('mc-err').classList.add('on');return;
-  }
-  var modo=MC_MODE;
-  cerrarModal();
-  if(modo==='admin'){
-    document.getElementById('sh-admlock').style.display='none';
-    document.getElementById('sh-admform').style.display='flex';
-    document.getElementById('sh-del').style.display='inline-flex';
-    document.getElementById('sh-edit').style.display='inline-flex';
-    toast('Acceso admin concedido','ok');
-  }else if(modo==='reg'){doRegistrar();}
-  else if(modo==='acc'){ir('accesos');}
-  else if(modo==='gest'||modo==='gest2'){ir('gestion');if(modo==='gest2')setTimeout(abrirConfigSesion,120);}
-};
+// verClave unificada — ver función verClave() arriba
 
 // ── CARRUSEL ──────────────────────────────
 var _carIdx=0, _carItems=[];
