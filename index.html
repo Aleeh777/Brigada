@@ -1876,10 +1876,11 @@ function verClave(){
     document.getElementById('sh-del').style.display='inline-flex';
     document.getElementById('sh-edit').style.display='inline-flex';
     toast('Acceso admin concedido','ok');
-    // Si había una edicion pendiente, ejecutarla ahora
-    if(window._editarPendiente){
-      window._editarPendiente=false;
-      setTimeout(function(){editar();},120);
+    // Si había edición pendiente, ejecutarla con el CID guardado
+    if(window._editarCID){
+      var _cid = window._editarCID;
+      window._editarCID = null;
+      setTimeout(function(){ _ejecutarEditar(_cid); }, 150);
     }
   }else if(MC_MODE==='reg'){doRegistrar();}
   else if(MC_MODE==='acc'){ir('accesos');}
@@ -1947,28 +1948,58 @@ function cambiarEstado(){
 
 /* EDITAR */
 function editar(){
-  // Pedir clave admin si no está autenticado
+  // Guardar CID antes de que closeSheet lo borre
+  var _cid = CID;
+  if(!_cid){ toast('No hay registro seleccionado','err'); return; }
+
   if(!_ADM_OK){
-    // Guardar callback para ejecutar después de verificar
-    window._editarPendiente=true;
-    pedirAdmin();
+    // Guardar el CID para usarlo después de verificar la clave
+    window._editarCID = _cid;
+    MC_MODE='admin';
+    document.getElementById('mc-pas').value='';
+    document.getElementById('mc-err').classList.remove('on');
+    var cfgs = {admin:{ico:'&#128274;',tit:'Acceso Administrador',sub:'Requerido para editar registros.'}};
+    var c = cfgs['admin'];
+    var el = document.getElementById('mod-clave');
+    if(el){
+      document.getElementById('mc-ico').innerHTML = c.ico;
+      document.getElementById('mc-tit').textContent = c.tit;
+      document.getElementById('mc-sub').textContent = c.sub||'';
+      el.classList.add('open');
+    }
     return;
   }
+  // Tiene acceso admin — ir directo a editar
+  _ejecutarEditar(_cid);
+}
+
+function _ejecutarEditar(cid){
+  CID = cid;
+  var r = DB.find(function(x){ return x.id === cid; });
+  if(!r){ toast('Registro no encontrado','err'); return; }
+  // Cerrar sheet si está abierto
+  var sheet = document.getElementById('sheet');
+  if(sheet) sheet.classList.remove('open');
+
   var isMobile = window.innerWidth < 768 || /Android|iPhone|iPad/i.test(navigator.userAgent);
-  if(isMobile){ editarMovil(); return; }
-  // PC: flujo original — ir('cargar')
-  var r=DB.find(function(x){return x.id===CID;});if(!r)return;
-  EID=CID;closeSheet();
-  function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
-  TIPO=r.tipo||'PROFUGO';
-  document.querySelectorAll('.topt').forEach(function(o){o.className='topt'+(o.dataset.t===TIPO?' t'+TIPO[0]:'');});
-  updSec(TIPO);
-  sv('f-dni',r.dni);sv('f-nom',r.nombre);sv('f-ali',r.alias);sv('f-fnac',r.fnac);
-  sv('f-dom',r.dom);sv('f-des',r.des);sv('f-veh',r.veh);sv('f-fam',r.fam);
-  sv('f-del',r.delito);sv('f-cau',r.causa);sv('f-juz',r.juz);sv('f-obs',r.obs);
-  sv('f-age',r.agente);sv('f-mot',r.motivo||'');sv('f-lug',r.lugar||'');
-  document.getElementById('f-pro').value=r.prov||'';
-  TMP=JSON.parse(JSON.stringify(FT[r.id]||[]));renderPrev();ir('cargar');
+  if(isMobile){
+    editarMovil();
+  } else {
+    // PC
+    EID = cid;
+    function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
+    TIPO = r.tipo||'PROFUGO';
+    document.querySelectorAll('.topt').forEach(function(o){
+      o.className='topt'+(o.dataset.t===TIPO?' t'+TIPO[0]:'');
+    });
+    if(typeof updSec==='function') updSec(TIPO);
+    sv('f-dni',r.dni);sv('f-nom',r.nombre);sv('f-ali',r.alias);sv('f-fnac',r.fnac);
+    sv('f-dom',r.dom);sv('f-des',r.des);sv('f-veh',r.veh);sv('f-fam',r.fam);
+    sv('f-del',r.delito);sv('f-cau',r.causa);sv('f-juz',r.juz);sv('f-obs',r.obs);
+    sv('f-age',r.agente);sv('f-mot',r.motivo||'');
+    if(typeof cargarFotosForm==='function') cargarFotosForm(r.id);
+    ir('cargar');
+  }
 }
 
 function editarMovil(){
