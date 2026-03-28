@@ -1876,11 +1876,9 @@ function verClave(){
     document.getElementById('sh-del').style.display='inline-flex';
     document.getElementById('sh-edit').style.display='inline-flex';
     toast('Acceso admin concedido','ok');
-    // Si había edición pendiente, ejecutarla con el CID guardado
-    if(window._editarCID){
-      var _cid = window._editarCID;
-      window._editarCID = null;
-      setTimeout(function(){ _ejecutarEditar(_cid); }, 150);
+    // Si había edición pendiente, ejecutarla ahora
+    if(window._EID_PENDING){
+      setTimeout(function(){ _abrirFormEditar(); }, 150);
     }
   }else if(MC_MODE==='reg'){doRegistrar();}
   else if(MC_MODE==='acc'){ir('accesos');}
@@ -1948,56 +1946,32 @@ function cambiarEstado(){
 
 /* EDITAR */
 function editar(){
-  // Guardar CID antes de que closeSheet lo borre
-  var _cid = CID;
-  if(!_cid){ toast('No hay registro seleccionado','err'); return; }
-
-  if(!_ADM_OK){
-    // Guardar el CID para usarlo después de verificar la clave
-    window._editarCID = _cid;
-    MC_MODE='admin';
-    document.getElementById('mc-pas').value='';
-    document.getElementById('mc-err').classList.remove('on');
-    var cfgs = {admin:{ico:'&#128274;',tit:'Acceso Administrador',sub:'Requerido para editar registros.'}};
-    var c = cfgs['admin'];
-    var el = document.getElementById('mod-clave');
-    if(el){
-      document.getElementById('mc-ico').innerHTML = c.ico;
-      document.getElementById('mc-tit').textContent = c.tit;
-      document.getElementById('mc-sub').textContent = c.sub||'';
-      el.classList.add('open');
-    }
-    return;
-  }
-  // Tiene acceso admin — ir directo a editar
-  _ejecutarEditar(_cid);
+  // Guardar CID ahora antes de que cualquier closeSheet lo borre
+  window._EID_PENDING = CID;
+  if(!window._EID_PENDING){ toast('Sin registro seleccionado','err'); return; }
+  if(!_ADM_OK){ abrirModal('admin'); return; }
+  _abrirFormEditar();
 }
-
-function _ejecutarEditar(cid){
-  CID = cid;
-  var r = DB.find(function(x){ return x.id === cid; });
+function _abrirFormEditar(){
+  var cid = window._EID_PENDING;
+  if(!cid){ toast('Sin registro','err'); return; }
+  CID = cid; EID = cid;
+  var r = DB.find(function(x){ return x.id===cid; });
   if(!r){ toast('Registro no encontrado','err'); return; }
-  // Cerrar sheet si está abierto
-  var sheet = document.getElementById('sheet');
-  if(sheet) sheet.classList.remove('open');
-
-  var isMobile = window.innerWidth < 768 || /Android|iPhone|iPad/i.test(navigator.userAgent);
-  if(isMobile){
-    editarMovil();
-  } else {
-    // PC
-    EID = cid;
+  // Cerrar sheet sin borrar CID
+  document.getElementById('sheet').classList.remove('open');
+  var isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth<768;
+  if(isMobile){ editarMovil(); }
+  else {
     function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
-    TIPO = r.tipo||'PROFUGO';
-    document.querySelectorAll('.topt').forEach(function(o){
-      o.className='topt'+(o.dataset.t===TIPO?' t'+TIPO[0]:'');
-    });
-    if(typeof updSec==='function') updSec(TIPO);
+    TIPO=r.tipo||'PROFUGO';
+    document.querySelectorAll('.topt').forEach(function(o){o.className='topt'+(o.dataset.t===TIPO?' t'+TIPO[0]:'');});
+    if(typeof updSec==='function')updSec(TIPO);
     sv('f-dni',r.dni);sv('f-nom',r.nombre);sv('f-ali',r.alias);sv('f-fnac',r.fnac);
     sv('f-dom',r.dom);sv('f-des',r.des);sv('f-veh',r.veh);sv('f-fam',r.fam);
     sv('f-del',r.delito);sv('f-cau',r.causa);sv('f-juz',r.juz);sv('f-obs',r.obs);
     sv('f-age',r.agente);sv('f-mot',r.motivo||'');
-    if(typeof cargarFotosForm==='function') cargarFotosForm(r.id);
+    if(typeof cargarFotosForm==='function')cargarFotosForm(r.id);
     ir('cargar');
   }
 }
@@ -2621,22 +2595,32 @@ function mostrarAdvertenciaRestore(){
   // NO mostrar al restaurar sesión — el usuario ya la vio
 }
 function _mostrarAdvUI(nom){
-  var el=document.getElementById('mod-adv');
-  if(!el)return;
-  var usr=USR||{nombre:nom,cargo:''};
-  // Inyectar nombre/cargo en el modal
-  var sub=el.querySelector('.adv-sub');
-  if(!sub){
-    sub=document.createElement('div');
-    sub.className='adv-sub';
-    sub.style.cssText='font-family:var(--mono);font-size:11px;color:#00c8ff;text-align:center;margin:-4px 0 14px;letter-spacing:.06em;';
-    var tit=el.querySelector('.adv-tit');
-    if(tit)tit.insertAdjacentElement('afterend',sub);
-  }
-  sub.textContent=nom.toUpperCase()+(usr.cargo?' — '+usr.cargo.toUpperCase():'');
-  el.dataset.advk='adv_'+nom.toLowerCase().replace(/\s+/g,'_');
-  el.style.cssText='display:flex;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);';
-  el.classList.add('open');
+  setTimeout(function(){
+    var el=document.getElementById('mod-adv');
+    if(!el)return;
+    // Inyectar nombre y cargo
+    var sub=el.querySelector('.adv-sub');
+    if(!sub){
+      sub=document.createElement('div');
+      sub.className='adv-sub';
+      sub.style.cssText='font-family:var(--mono);font-size:11px;color:#00c8ff;text-align:center;margin:0 0 14px;letter-spacing:.06em;padding:4px 0;';
+      var tit=el.querySelector('.adv-tit');
+      if(tit)tit.insertAdjacentElement('afterend',sub);
+    }
+    var cargo = USR&&USR.cargo?USR.cargo:'';
+    sub.textContent=nom.toUpperCase()+(cargo?' — '+cargo.toUpperCase():'');
+    // Forzar visibilidad con inline style — z-index por encima de todo
+    el.removeAttribute('style');
+    el.style.display='flex';
+    el.style.position='fixed';
+    el.style.inset='0';
+    el.style.background='rgba(0,0,0,.88)';
+    el.style.zIndex='99999';
+    el.style.alignItems='center';
+    el.style.justifyContent='center';
+    el.style.padding='20px';
+    el.classList.add('open');
+  }, 300);
 }
 function cerrarAdvertencia(){
   if(!document.getElementById('adv-cb').checked)return;
