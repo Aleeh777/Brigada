@@ -1876,10 +1876,8 @@ function verClave(){
     document.getElementById('sh-del').style.display='inline-flex';
     document.getElementById('sh-edit').style.display='inline-flex';
     toast('Acceso admin concedido','ok');
-    // Si había edición pendiente, ejecutarla ahora
-    if(window._EID_PENDING){
-      setTimeout(function(){ _abrirFormEditar(); }, 150);
-    }
+    // Callbacks pendientes tras autenticación
+    if(window._guardando){ window._guardando=false; setTimeout(guardarEdicionMovil,100); }
   }else if(MC_MODE==='reg'){doRegistrar();}
   else if(MC_MODE==='acc'){ir('accesos');}
   else if(MC_MODE==='gest'){ir('gestion');}
@@ -1946,23 +1944,15 @@ function cambiarEstado(){
 
 /* EDITAR */
 function editar(){
-  // Guardar CID ahora antes de que cualquier closeSheet lo borre
-  window._EID_PENDING = CID;
-  if(!window._EID_PENDING){ toast('Sin registro seleccionado','err'); return; }
-  if(!_ADM_OK){ abrirModal('admin'); return; }
-  _abrirFormEditar();
-}
-function _abrirFormEditar(){
-  var cid = window._EID_PENDING;
-  if(!cid){ toast('Sin registro','err'); return; }
-  CID = cid; EID = cid;
-  var r = DB.find(function(x){ return x.id===cid; });
-  if(!r){ toast('Registro no encontrado','err'); return; }
-  // Cerrar sheet sin borrar CID
+  var cid = CID;
+  if(!cid){ toast('Sin registro seleccionado','err'); return; }
+  // Cerrar sheet preservando el cid
   document.getElementById('sheet').classList.remove('open');
+  CID = cid; EID = cid;
   var isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth<768;
   if(isMobile){ editarMovil(); }
   else {
+    var r=DB.find(function(x){return x.id===cid;});if(!r)return;
     function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
     TIPO=r.tipo||'PROFUGO';
     document.querySelectorAll('.topt').forEach(function(o){o.className='topt'+(o.dataset.t===TIPO?' t'+TIPO[0]:'');});
@@ -1978,7 +1968,8 @@ function _abrirFormEditar(){
 
 function editarMovil(){
   var r=DB.find(function(x){return x.id===CID;});if(!r)return;
-  EID=CID; closeSheet();
+  EID=CID;
+  document.getElementById('sheet').classList.remove('open');
   TMP=JSON.parse(JSON.stringify(FT[r.id]||[]));
   window.EIT_TIPO = r.tipo||'PROFUGO';
 
@@ -2128,6 +2119,7 @@ function editarMovil(){
 }
 
 function guardarEdicionMovil(){
+  if(!_ADM_OK){ MC_MODE='admin'; window._guardando=true; abrirModal('admin'); return; }
   function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}
   var nombre=g('em-nom'), agente=g('em-age');
   if(!nombre){toast('El nombre es obligatorio','err');return;}
