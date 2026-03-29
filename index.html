@@ -1944,25 +1944,25 @@ function cambiarEstado(){
 
 /* EDITAR */
 function editar(){
-  var cid = CID;
-  if(!cid){ toast('Sin registro seleccionado','err'); return; }
-  // Cerrar sheet preservando el cid
-  document.getElementById('sheet').classList.remove('open');
-  CID = cid; EID = cid;
-  var isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth<768;
-  if(isMobile){ editarMovil(); }
-  else {
+  var cid=CID; if(!cid)return;
+  var isMobile=/Android|iPhone|iPad/i.test(navigator.userAgent)||window.innerWidth<768;
+  if(isMobile){
+    // En móvil cerrar sheet preservando CID
+    document.getElementById('sheet').classList.remove('open');
+    CID=cid; EID=cid;
+    editarMovil();
+  } else {
     var r=DB.find(function(x){return x.id===cid;});if(!r)return;
+    EID=cid; closeSheet();
     function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
     TIPO=r.tipo||'PROFUGO';
     document.querySelectorAll('.topt').forEach(function(o){o.className='topt'+(o.dataset.t===TIPO?' t'+TIPO[0]:'');});
-    if(typeof updSec==='function')updSec(TIPO);
+    updSec(TIPO);
     sv('f-dni',r.dni);sv('f-nom',r.nombre);sv('f-ali',r.alias);sv('f-fnac',r.fnac);
     sv('f-dom',r.dom);sv('f-des',r.des);sv('f-veh',r.veh);sv('f-fam',r.fam);
     sv('f-del',r.delito);sv('f-cau',r.causa);sv('f-juz',r.juz);sv('f-obs',r.obs);
     sv('f-age',r.agente);sv('f-mot',r.motivo||'');
-    if(typeof cargarFotosForm==='function')cargarFotosForm(r.id);
-    ir('cargar');
+    TMP=JSON.parse(JSON.stringify(FT[r.id]||[]));renderPrev();ir('cargar');
   }
 }
 
@@ -2118,66 +2118,48 @@ function editarMovil(){
   renderFotosMovil();
 }
 
+
 function _confirmarGuardar(){
+  // Verificar clave en el campo inline
   var inp=document.getElementById('em-clave-inp');
   if(!inp)return;
   if(inp.value!==getCA()){
-    var err=document.getElementById('em-clave-err');
-    if(err)err.style.display='block';
-    inp.value='';inp.focus();return;
+    inp.style.borderColor='#ff4455';
+    inp.value='';
+    var lbl=document.getElementById('em-clave-lbl');
+    if(lbl){lbl.textContent='CLAVE INCORRECTA — intente de nuevo';lbl.style.color='#ff4455';}
+    inp.focus();return;
   }
   _ADM_OK=true;
-  // Restaurar edit-movil y quitar overlay
-  var em=document.getElementById('edit-movil');
-  if(em)em.style.zIndex='500';
-  var ov=document.getElementById('em-clave-ov');
-  if(ov)ov.remove();
-  toast('Acceso admin concedido','ok');
   guardarEdicionMovil();
 }
 
 function guardarEdicionMovil(){
+  // Si no tiene admin, mostrar campo de clave INLINE en el formulario
   if(!_ADM_OK){
-    if(document.getElementById('em-clave-ov'))return;
-    // Bajar edit-movil para que no tape el overlay
-    var em=document.getElementById('edit-movil');
-    if(em)em.style.zIndex='1';
-    // Overlay en body con z-index maximo
-    var ov=document.createElement('div');
-    ov.id='em-clave-ov';
-    ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;padding:24px;';
-    var card=document.createElement('div');
-    card.style.cssText='background:#0d1525;border:2px solid #00c8ff;border-radius:12px;padding:30px 22px;width:100%;max-width:320px;text-align:center;';
-    var tit=document.createElement('div');
-    tit.textContent='CLAVE ADMINISTRADOR';
-    tit.style.cssText='font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:22px;color:#00c8ff;letter-spacing:.08em;margin-bottom:20px;';
+    var secClave=document.getElementById('em-sec-clave');
+    if(secClave){secClave.style.display='block';document.getElementById('em-clave-inp').focus();return;}
+    // Crear sección de clave al final del formulario
+    var em=document.getElementById('edit-movil');if(!em)return;
+    var sec=document.createElement('div');
+    sec.id='em-sec-clave';
+    sec.style.cssText='padding:16px;background:#0a1525;border-top:2px solid rgba(0,200,255,.3);';
+    var lbl=document.createElement('div');
+    lbl.id='em-clave-lbl';
+    lbl.textContent='SE REQUIERE CLAVE ADMIN PARA GUARDAR';
+    lbl.style.cssText='font-family:Share Tech Mono,monospace;font-size:10px;color:rgba(0,200,255,.7);letter-spacing:.08em;margin-bottom:10px;text-align:center;';
     var inp=document.createElement('input');
-    inp.id='em-clave-inp';inp.type='password';inp.placeholder='Ingrese clave';
-    inp.style.cssText='width:100%;background:#070d1a;border:2px solid rgba(0,200,255,.4);border-radius:8px;padding:16px;color:#fff;font-size:22px;text-align:center;letter-spacing:.2em;box-sizing:border-box;-webkit-appearance:none;outline:none;';
+    inp.id='em-clave-inp';inp.type='password';inp.placeholder='Ingrese clave admin';
+    inp.style.cssText='width:100%;background:#070d1a;border:2px solid rgba(0,200,255,.4);border-radius:8px;padding:14px;color:#fff;font-size:18px;text-align:center;letter-spacing:.15em;box-sizing:border-box;-webkit-appearance:none;outline:none;margin-bottom:12px;';
     inp.addEventListener('keydown',function(e){if(e.key==='Enter')_confirmarGuardar();});
-    var err=document.createElement('div');
-    err.id='em-clave-err';
-    err.textContent='CLAVE INCORRECTA';
-    err.style.cssText='display:none;color:#ff4455;font-family:Share Tech Mono,monospace;font-size:11px;margin-top:10px;';
-    var btns=document.createElement('div');
-    btns.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;';
-    var bCan=document.createElement('button');
-    bCan.textContent='CANCELAR';
-    bCan.style.cssText='background:rgba(255,80,80,.12);border:1px solid rgba(255,80,80,.4);color:#ff6666;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;padding:14px;border-radius:8px;cursor:pointer;';
-    bCan.onclick=function(){
-      var em2=document.getElementById('edit-movil');
-      if(em2)em2.style.zIndex='500';
-      ov.remove();
-    };
-    var bOk=document.createElement('button');
-    bOk.textContent='CONFIRMAR';
-    bOk.style.cssText='background:rgba(0,200,255,.2);border:2px solid #00c8ff;color:#00c8ff;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;padding:14px;border-radius:8px;cursor:pointer;';
-    bOk.onclick=_confirmarGuardar;
-    btns.appendChild(bCan);btns.appendChild(bOk);
-    card.appendChild(tit);card.appendChild(inp);card.appendChild(err);card.appendChild(btns);
-    ov.appendChild(card);
-    document.body.appendChild(ov);
-    setTimeout(function(){inp.focus();},100);
+    var btnConf=document.createElement('button');
+    btnConf.textContent='CONFIRMAR Y GUARDAR';
+    btnConf.style.cssText='width:100%;background:rgba(0,200,255,.2);border:2px solid #00c8ff;color:#00c8ff;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:16px;letter-spacing:.1em;padding:14px;border-radius:8px;cursor:pointer;';
+    btnConf.onclick=_confirmarGuardar;
+    sec.appendChild(lbl);sec.appendChild(inp);sec.appendChild(btnConf);
+    em.appendChild(sec);
+    // Scroll hasta la sección de clave
+    setTimeout(function(){sec.scrollIntoView({behavior:'smooth'});inp.focus();},100);
     return;
   }
   function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}
