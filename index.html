@@ -2118,29 +2118,78 @@ function editarMovil(){
   renderFotosMovil();
 }
 
+function _confirmarGuardar(){
+  var inp=document.getElementById('em-clave-inp');
+  if(!inp)return;
+  if(inp.value!==getCA()){
+    var err=document.getElementById('em-clave-err');
+    if(err)err.style.display='block';
+    inp.value='';inp.focus();return;
+  }
+  _ADM_OK=true;
+  var ov=document.getElementById('em-clave-ov');
+  if(ov)ov.remove();
+  toast('Acceso admin concedido','ok');
+  guardarEdicionMovil();
+}
+
 function guardarEdicionMovil(){
-  if(!_ADM_OK){ MC_MODE='admin'; window._guardando=true; abrirModal('admin'); return; }
+  if(!_ADM_OK){
+    if(document.getElementById('em-clave-ov'))return;
+    var ov=document.createElement('div');
+    ov.id='em-clave-ov';
+    ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:24px;';
+    var card=document.createElement('div');
+    card.style.cssText='background:#0d1525;border:1px solid rgba(0,200,255,.3);border-radius:12px;padding:28px 22px;width:100%;max-width:320px;text-align:center;';
+    var tit=document.createElement('div');
+    tit.textContent='INGRESAR CLAVE ADMIN';
+    tit.style.cssText='font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:20px;color:#00c8ff;letter-spacing:.08em;margin-bottom:18px;';
+    var inp=document.createElement('input');
+    inp.id='em-clave-inp';inp.type='password';inp.placeholder='Clave';
+    inp.style.cssText='width:100%;background:#070d1a;border:1px solid rgba(0,200,255,.25);border-radius:6px;padding:14px;color:#fff;font-size:20px;text-align:center;letter-spacing:.2em;box-sizing:border-box;-webkit-appearance:none;';
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')_confirmarGuardar();});
+    var err=document.createElement('div');
+    err.id='em-clave-err';
+    err.textContent='CLAVE INCORRECTA';
+    err.style.cssText='display:none;color:#ff4455;font-family:Share Tech Mono,monospace;font-size:10px;margin-top:8px;';
+    var btns=document.createElement('div');
+    btns.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;';
+    var bCan=document.createElement('button');
+    bCan.textContent='CANCELAR';
+    bCan.style.cssText='background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.3);color:rgba(255,120,120,.9);font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;padding:12px;border-radius:6px;cursor:pointer;';
+    bCan.onclick=function(){ov.remove();};
+    var bOk=document.createElement('button');
+    bOk.textContent='CONFIRMAR';
+    bOk.style.cssText='background:rgba(0,200,255,.15);border:1px solid rgba(0,200,255,.4);color:#00c8ff;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;padding:12px;border-radius:6px;cursor:pointer;';
+    bOk.onclick=_confirmarGuardar;
+    btns.appendChild(bCan);btns.appendChild(bOk);
+    card.appendChild(tit);card.appendChild(inp);card.appendChild(err);card.appendChild(btns);
+    ov.appendChild(card);document.body.appendChild(ov);
+    setTimeout(function(){inp.focus();},150);
+    return;
+  }
   function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}
-  var nombre=g('em-nom'), agente=g('em-age');
+  var nombre=g('em-nom'),agente=g('em-age');
   if(!nombre){toast('El nombre es obligatorio','err');return;}
-  if(!agente){toast('Ingrese el agente responsable','err');return;}
+  if(!agente){toast('Ingrese agente responsable','err');return;}
   var r=DB.find(function(x){return x.id===EID;});
   if(!r){toast('Registro no encontrado','err');return;}
   var datos={
     tipo:window.EIT_TIPO||r.tipo,
-    nombre:nombre, dni:g('em-dni'), alias:g('em-ali'), fnac:g('em-fnac'),
-    edad:g('em-age2'), dom:g('em-dom'), delito:g('em-del'), causa:g('em-cau'),
-    juz:g('em-juz'), veh:g('em-veh'), fam:g('em-fam'), des:g('em-des'),
-    motivo:g('em-mot'), obs:g('em-obs'), agente:agente
+    nombre:nombre,dni:g('em-dni'),alias:g('em-ali'),fnac:g('em-fnac'),
+    edad:g('em-age2'),dom:g('em-dom'),delito:g('em-del'),causa:g('em-cau'),
+    juz:g('em-juz'),veh:g('em-veh'),fam:g('em-fam'),des:g('em-des'),
+    motivo:g('em-mot'),obs:g('em-obs'),agente:agente
   };
-  Object.assign(r, datos);
+  Object.assign(r,datos);
   if(!r.hist)r.hist=[];
-  r.hist.push({a:'EDICION',d:'Datos actualizados (movil).',ag:agente,f:ahora()});
-  if(TMP.length) FT[r.id]=TMP;
-  dbSave(); ftSave();
-  if(SC&&ONLINE) SB.update('registros',r.id,Object.assign({},datos,{fotos:JSON.stringify(FT[r.id]||[]),hist:JSON.stringify(r.hist)})).then(function(){marcarCambio();});
-  updateStats(); buscar();
-  document.getElementById('edit-movil').style.display='none';
+  r.hist.push({a:'EDICION',d:'Datos actualizados.',ag:agente,f:ahora()});
+  if(TMP&&TMP.length)FT[r.id]=TMP;
+  dbSave();ftSave();
+  if(SC&&ONLINE)SB.update('registros',r.id,Object.assign({},datos,{fotos:JSON.stringify(FT[r.id]||[]),hist:JSON.stringify(r.hist)})).then(function(){marcarCambio();});
+  updateStats();buscar();renderCarousel(DB);
+  var em=document.getElementById('edit-movil');
+  if(em)em.style.display='none';
   EID=null;
   toast('Registro actualizado','ok');
 }
