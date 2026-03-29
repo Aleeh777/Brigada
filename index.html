@@ -2,7 +2,13 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#03070e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1482,6 +1488,17 @@ function syncClaves(){
     });
   }).catch(function(){});
 }
+// Keep-alive: ping cada 4 días para evitar que Supabase pause el proyecto
+function keepAlive(){
+  var KEY='scp_ka';
+  var last=parseInt(localStorage.getItem(KEY)||'0');
+  var ahora4=Date.now();
+  var CUATRO_DIAS=4*24*60*60*1000;
+  if(ahora4-last < CUATRO_DIAS) return;
+  localStorage.setItem(KEY,String(ahora4));
+  sbReq('GET','registros?select=id&limit=1').catch(function(){});
+}
+setInterval(function(){if(SC)keepAlive();}, 60*60*1000); // chequear cada hora
 var SB={
   select:function(t){return sbReq('GET',t+'?order=id').then(function(r){
     if(r.ok&&Array.isArray(r.data))return{data:r.data,error:null};
@@ -1509,6 +1526,7 @@ function initSupa(){
     if(r.ok){
       SC=true;
       syncClaves();
+      keepAlive();
       SB.select('registros').then(function(res){
         if(res.error||!res.data)return;
         DB=res.data.map(function(x){return Object.assign({},x,{hist:tryJ(x.hist,[]),fotos:undefined});});
@@ -1520,7 +1538,15 @@ function initSupa(){
         toast(DB.length+' registros cargados del servidor','ok');
       });
     }else{
-      toast('Error servidor: '+(r.data&&r.data.message||'HTTP '+r.status),'err');
+      var msg = r.status===503||r.status===0
+        ? 'BASE DE DATOS PAUSADA — ir a supabase.com y reactivar el proyecto'
+        : 'Error servidor: '+(r.data&&r.data.message||'HTTP '+r.status);
+      toast(msg,'err');
+      // Mostrar aviso persistente si está pausado
+      if(r.status===503||r.status===0){
+        var snSrv=document.getElementById('sn-srv');
+        if(snSrv){snSrv.textContent='BD PAUSADA';snSrv.style.color='#ff4455';}
+      }
     }
   });
 }
