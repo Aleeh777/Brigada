@@ -1714,6 +1714,11 @@ function updateStats(){
   ['sp','sc','sd','ss'].forEach(function(id,i){document.getElementById(id).textContent=[p,c,d,s][i];});
   var b=document.getElementById('bnb'),a=p+c;b.textContent=a;b.style.display=a?'block':'none';
 }
+function buscar(){
+  // Actualizar carrusel y stats con los datos actuales
+  updateStats();
+  renderCarousel(DB);
+}
 
 /* BUSQUEDA */
 function onBuscarInput(val){
