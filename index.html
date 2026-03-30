@@ -1640,10 +1640,18 @@ function doLogin(){
   USR={nombre:nom,cargo:car,ts:ahora()};
   var acc={nombre:nom,cargo:car,fecha:ahora(),tipo:'INGRESO'};
   ACC.unshift(acc);accSave();
-  if(SC&&ONLINE)SB.insert('accesos',acc).then(function(r){if(r&&r.error)console.log('acc err:',r.error.message);});
+  if(SC&&ONLINE){
+    // Intentar con todos los campos primero
+    SB.insert('accesos',acc).then(function(r){
+      if(r&&r.error){
+        // Si falla, intentar solo con los campos básicos
+        SB.insert('accesos',{nombre:nom,cargo:car}).then(function(){});
+      }
+    });
+  }
   document.getElementById('scr-login').classList.add('gone');
   document.getElementById('app').classList.add('on');
-  document.getElementById('pb').style.display='block';
+  ir('buscar');
   var _ply=document.getElementById('panel-lista');if(_ply)_ply.style.display='none';
   if(DB && DB.length > 0){ setTimeout(function(){ renderCarousel(DB); }, 100); }
   var ini=nom[0].toUpperCase();
@@ -2804,7 +2812,7 @@ if(restaurarSes()){
   document.getElementById('scr-login').classList.add('gone');
   document.getElementById('app').classList.add('on');
   actualizarBarraSesion();iniciarTimerSesion();iniciarPolling();
-  pushState('buscar');initSupa();
+  ir('buscar');initSupa();
   mostrarAdvertenciaRestore();
   // Registrar ingreso por restauracion de sesion
   setTimeout(function(){
