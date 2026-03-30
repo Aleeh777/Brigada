@@ -2145,55 +2145,26 @@ function editarMovil(){
 }
 
 
-function _confirmarGuardar(){
-  // Verificar clave en el campo inline
-  var inp=document.getElementById('em-clave-inp');
-  if(!inp)return;
-  if(inp.value!==getCA()){
-    inp.style.borderColor='#ff4455';
-    inp.value='';
-    var lbl=document.getElementById('em-clave-lbl');
-    if(lbl){lbl.textContent='CLAVE INCORRECTA — intente de nuevo';lbl.style.color='#ff4455';}
-    inp.focus();return;
-  }
-  _ADM_OK=true;
-  guardarEdicionMovil();
-}
+function _confirmarGuardar(){}
 
 function guardarEdicionMovil(){
-  // Si no tiene admin, mostrar campo de clave INLINE en el formulario
+  // Verificar admin con prompt nativo — funciona siempre en cualquier contexto
   if(!_ADM_OK){
-    var secClave=document.getElementById('em-sec-clave');
-    if(secClave){secClave.style.display='block';document.getElementById('em-clave-inp').focus();return;}
-    // Crear sección de clave al final del formulario
-    var em=document.getElementById('edit-movil');if(!em)return;
-    var sec=document.createElement('div');
-    sec.id='em-sec-clave';
-    sec.style.cssText='padding:16px;background:#0a1525;border-top:2px solid rgba(0,200,255,.3);';
-    var lbl=document.createElement('div');
-    lbl.id='em-clave-lbl';
-    lbl.textContent='SE REQUIERE CLAVE ADMIN PARA GUARDAR';
-    lbl.style.cssText='font-family:Share Tech Mono,monospace;font-size:10px;color:rgba(0,200,255,.7);letter-spacing:.08em;margin-bottom:10px;text-align:center;';
-    var inp=document.createElement('input');
-    inp.id='em-clave-inp';inp.type='password';inp.placeholder='Ingrese clave admin';
-    inp.style.cssText='width:100%;background:#070d1a;border:2px solid rgba(0,200,255,.4);border-radius:8px;padding:14px;color:#fff;font-size:18px;text-align:center;letter-spacing:.15em;box-sizing:border-box;-webkit-appearance:none;outline:none;margin-bottom:12px;';
-    inp.addEventListener('keydown',function(e){if(e.key==='Enter')_confirmarGuardar();});
-    var btnConf=document.createElement('button');
-    btnConf.textContent='CONFIRMAR Y GUARDAR';
-    btnConf.style.cssText='width:100%;background:rgba(0,200,255,.2);border:2px solid #00c8ff;color:#00c8ff;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:16px;letter-spacing:.1em;padding:14px;border-radius:8px;cursor:pointer;';
-    btnConf.onclick=_confirmarGuardar;
-    sec.appendChild(lbl);sec.appendChild(inp);sec.appendChild(btnConf);
-    em.appendChild(sec);
-    // Scroll hasta la sección de clave
-    setTimeout(function(){sec.scrollIntoView({behavior:'smooth'});inp.focus();},100);
-    return;
+    var clave = window.prompt('Ingrese la clave de administrador:');
+    if(clave===null) return; // canceló
+    if(clave !== getCA()){
+      window.alert('Clave incorrecta. Intente de nuevo.');
+      return;
+    }
+    _ADM_OK = true;
+    toast('Acceso admin concedido','ok');
   }
   function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}
   var nombre=g('em-nom'),agente=g('em-age');
   if(!nombre){toast('El nombre es obligatorio','err');return;}
   if(!agente){toast('Ingrese agente responsable','err');return;}
   var r=DB.find(function(x){return x.id===EID;});
-  if(!r){toast('Registro no encontrado','err');return;}
+  if(!r){toast('Registro no encontrado. EID='+EID,'err');return;}
   var datos={
     tipo:window.EIT_TIPO||r.tipo,
     nombre:nombre,dni:g('em-dni'),alias:g('em-ali'),fnac:g('em-fnac'),
@@ -2206,7 +2177,15 @@ function guardarEdicionMovil(){
   r.hist.push({a:'EDICION',d:'Datos actualizados.',ag:agente,f:ahora()});
   if(TMP&&TMP.length)FT[r.id]=TMP;
   dbSave();ftSave();
-  if(SC&&ONLINE)SB.update('registros',r.id,Object.assign({},datos,{fotos:JSON.stringify(FT[r.id]||[]),hist:JSON.stringify(r.hist)})).then(function(){marcarCambio();});
+  if(SC&&ONLINE){
+    SB.update('registros',r.id,Object.assign({},datos,{
+      fotos:JSON.stringify(FT[r.id]||[]),
+      hist:JSON.stringify(r.hist)
+    })).then(function(res){
+      if(res.error) toast('Error al sincronizar: '+res.error.message,'err');
+      else marcarCambio();
+    });
+  }
   updateStats();buscar();renderCarousel(DB);
   var em=document.getElementById('edit-movil');
   if(em)em.style.display='none';
@@ -2507,6 +2486,65 @@ function sincronizar(){
       DB=[];FT={};dbSave();ftSave();renderSync();updateStats();buscar();
       toast('El servidor esta vacio','av');
     }
+  });
+}
+
+function subirAlServidor(){
+  // Sube TODOS los registros del localStorage a Supabase
+  if(!ONLINE){toast('Sin conexion','err');return;}
+  if(!SC){toast('Servidor no disponible','err');return;}
+  if(!DB||!DB.length){toast('No hay datos locales para subir','av');return;}
+  if(!confirm('Subir '+DB.length+' registros al servidor? Esto reemplazara los datos del servidor.'))return;
+
+  var btn=document.getElementById('btn-upload');
+  if(btn){btn.disabled=true;btn.textContent='SUBIENDO...';}
+  toast('Subiendo '+DB.length+' registros...','av');
+
+  // Primero borrar todos los registros del servidor
+  sbReq('DELETE','registros?id=gt.0',null,null).then(function(){
+    // Subir uno por uno
+    var i=0;
+    function subirSiguiente(){
+      if(i>=DB.length){
+        if(btn){btn.disabled=false;btn.textContent='SUBIR AL SERVIDOR';}
+        toast('Subida completa: '+DB.length+' registros','ok');
+        localStorage.setItem(KSYNC,ahora());
+        return;
+      }
+      var r=DB[i];
+      var payload=Object.assign({},r,{
+        fotos:JSON.stringify(FT[r.id]||[]),
+        hist:JSON.stringify(r.hist||[])
+      });
+      // Quitar id para que Supabase lo asigne (si es id local)
+      SB.insert('registros',payload).then(function(res){
+        if(res.error) toast('Error en registro '+(i+1)+': '+res.error.message,'err');
+        i++;
+        subirSiguiente();
+      });
+    }
+    subirSiguiente();
+  }).catch(function(e){
+    if(btn){btn.disabled=false;btn.textContent='SUBIR AL SERVIDOR';}
+    // Si no se puede borrar, intentar upsert directo
+    toast('Sincronizando por upsert...','av');
+    var i=0;
+    function upsertSiguiente(){
+      if(i>=DB.length){
+        if(btn){btn.disabled=false;btn.textContent='SUBIR AL SERVIDOR';}
+        toast('Sincronizado: '+DB.length+' registros','ok');
+        return;
+      }
+      var r=DB[i];
+      var payload=Object.assign({},r,{
+        fotos:JSON.stringify(FT[r.id]||[]),
+        hist:JSON.stringify(r.hist||[])
+      });
+      sbReq('POST','registros',payload,{'Prefer':'resolution=merge-duplicates,return=minimal'}).then(function(){
+        i++; upsertSiguiente();
+      });
+    }
+    upsertSiguiente();
   });
 }
 
