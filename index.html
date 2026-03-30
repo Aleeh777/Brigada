@@ -1208,20 +1208,20 @@ input,select,textarea{font-family:var(--ui)}
         <div class="phdr">ESTADO DEL SERVIDOR</div>
         <div class="pbod">
           <div class="snums">
-            <div class="sbox"><div class="sboxn" id="sn-loc">--</div><div class="sboxl">En este dispositivo</div></div>
-            <div class="sbox"><div class="sboxn" style="color:var(--cyan)" id="sn-srv">--</div><div class="sboxl">En el servidor</div></div>
+            <div class="sbox"><div class="sboxn" id="sn-loc">--</div><div class="sboxl">Cargados ahora</div></div>
+            <div class="sbox"><div class="sboxn" style="color:var(--cyan)" id="sn-srv">--</div><div class="sboxl">En Supabase</div></div>
           </div>
           <div style="font-family:var(--mono);font-size:var(--f9);color:var(--dim)" id="sync-last">Ultima sincronizacion: Nunca</div>
         </div>
       </div>
       <button class="btn bp bfw" style="margin-bottom:10px;background:rgba(0,200,100,.15);border-color:rgba(0,200,100,.4);color:#00e676" id="btn-upload" onclick="subirAlServidor()">&#8593; SUBIR LOCAL AL SERVIDOR</button>
-      <button class="btn bw bfw" id="btn-sync" onclick="sincronizar()">&#8595; DESCARGAR AL DISPOSITIVO</button>
+      <button class="btn bw bfw" id="btn-sync" onclick="sincronizar()">&#8595; RECARGAR DEL SERVIDOR</button>
       <div class="panel">
         <div class="phdr">COMO FUNCIONA</div>
         <div class="pbod" style="font-family:var(--mono);font-size:var(--f11);color:var(--dim);gap:clamp(7px,1.8vw,10px);line-height:1.9">
-          <div>CON INTERNET: Los registros se guardan en el servidor y son visibles para todos los dispositivos en tiempo real.</div>
-          <div>SIN INTERNET: Busque por DNI, nombre o apodo con los datos descargados previamente.</div>
-          <div>SINCRONIZAR: Descarga la base completa del servidor para disponibilidad sin conexion.</div>
+          <div>ONLINE: Los datos vienen directamente de Supabase en tiempo real. Se requiere internet.</div>
+          <div>OFFLINE: Sin internet no hay acceso a los datos.</div>
+          <div>RECARGAR: Vuelve a cargar todos los registros desde el servidor.</div>
         </div>
       </div>
     </div>
@@ -1480,6 +1480,30 @@ function sbReq(method,path,body,xh){
   })
   .catch(function(e){return{ok:false,status:0,data:null,error:e.message};});
 }
+function cargarDesdeServidor(){
+  if(!SC||!ONLINE) return;
+  SB.select('registros').then(function(res){
+    if(res.error||!res.data){
+      toast('Error cargando datos: '+(res.error?res.error.message:'sin datos'),'err');
+      return;
+    }
+    // Reemplazar DB completamente con datos del servidor
+    DB=res.data.map(function(x){
+      return Object.assign({},x,{hist:tryJ(x.hist,[]),fotos:undefined});
+    });
+    FT={};
+    res.data.forEach(function(x){
+      var f=tryJ(x.fotos,[]);
+      if(f&&f.length) FT[x.id]=f;
+    });
+    localStorage.setItem(KSYNC,ahora());
+    updateStats();
+    buscar();
+    renderCarousel(DB);
+    if(DB.length) toast(DB.length+' registros cargados','ok');
+  });
+}
+
 function syncClaves(){
   if(!SC)return;
   sbReq('GET',SUPA_URL+'/rest/v1/config?select=key,value',null,null).then(function(res){
@@ -1528,16 +1552,7 @@ function initSupa(){
       SC=true;
       syncClaves();
       keepAlive();
-      SB.select('registros').then(function(res){
-        if(res.error||!res.data)return;
-        DB=res.data.map(function(x){return Object.assign({},x,{hist:tryJ(x.hist,[]),fotos:undefined});});
-        FT={};
-        res.data.forEach(function(x){var f=tryJ(x.fotos,[]);if(f&&f.length)FT[x.id]=f;});
-        dbSave();ftSave();
-        localStorage.setItem(KSYNC,ahora());
-        updateStats();buscar();
-        toast(DB.length+' registros cargados del servidor','ok');
-      });
+      cargarDesdeServidor();
     }else{
       var msg = r.status===503||r.status===0
         ? 'BASE DE DATOS PAUSADA — ir a supabase.com y reactivar el proyecto'
@@ -1554,12 +1569,12 @@ function initSupa(){
 
 /* STORAGE */
 function dbLoad(){
-  try{DB=JSON.parse(localStorage.getItem(KDB))||[];}catch(e){DB=[];}
-  try{FT=JSON.parse(localStorage.getItem(KFT))||{};}catch(e){FT={};}
+  // Solo carga accesos locales — registros vienen SOLO de Supabase
+  DB=[]; FT={};
   try{ACC=JSON.parse(localStorage.getItem(KACC))||[];}catch(e){ACC=[];}
 }
-function dbSave(){localStorage.setItem(KDB,JSON.stringify(DB));}
-function ftSave(){try{localStorage.setItem(KFT,JSON.stringify(FT));}catch(e){toast('Almacenamiento lleno','err');}}
+function dbSave(){/* solo online — no guardar registros en localStorage */}
+function ftSave(){/* solo online — fotos en Supabase */}
 function accSave(){localStorage.setItem(KACC,JSON.stringify(ACC));}
 function ahora(){return new Date().toLocaleString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
 function ef(r){return r.estado==='DETENIDO'?'DETENIDO':r.tipo;}
@@ -2188,7 +2203,7 @@ function guardarEdicionMovil(){
       else marcarCambio();
     });
   }
-  updateStats();buscar();renderCarousel(DB);
+  cargarDesdeServidor();
   var em=document.getElementById('edit-movil');
   if(em)em.style.display='none';
   EID=null;
@@ -2428,18 +2443,15 @@ function doRegistrar(){
             var rec=Object.assign({},datos,{id:row.id,fecha:fecha,hist:hist});
             DB.push(rec);
             if(TMP.length){FT[row.id]=TMP;ftSave();}
-            dbSave();updateStats();buscar();limpForm();ir('buscar');
+            limpForm();ir('buscar');
             marcarCambio();
+            cargarDesdeServidor();
             toast('Legajo #'+String(row.id).padStart(4,'0')+' guardado','ok');
           }
         });
       }else{
-        var lid=DB.length?Math.max.apply(null,DB.map(function(r){return r.id||0;}))+1:1;
-        DB.push(Object.assign({},datos,{id:lid,fecha:fecha,hist:hist}));
-        if(TMP.length){FT[lid]=TMP;ftSave();}
-        dbSave();updateStats();buscar();limpForm();ir('buscar');
-        toast('Guardado local. Sincronice cuando haya conexion.','av');
         btn.innerHTML='REGISTRAR';btn.disabled=false;
+        toast('Se requiere internet para registrar','err');
       }
     }
   },300);
@@ -2457,44 +2469,44 @@ function limpForm(){
 function renderSync(){
   var pill=document.getElementById('sync-pill');
   document.getElementById('sn-loc').textContent=DB.length;
-  document.getElementById('sync-last').textContent='Ultima sincronizacion: '+(localStorage.getItem(KSYNC)||'Nunca');
+  document.getElementById('sync-last').textContent='Ultima carga: '+(localStorage.getItem(KSYNC)||'Nunca');
   if(ONLINE&&SC){
-    pill.className='alerta a-ok';pill.textContent='Conectado al servidor Supabase';
-    SB.count('registros').then(function(n){document.getElementById('sn-srv').textContent=n;});
+    pill.className='alerta a-ok';pill.textContent='Conectado — datos en tiempo real';
+    SB.count('registros').then(function(n){
+      var el=document.getElementById('sn-srv');
+      if(el)el.textContent=n;
+    });
   }else if(ONLINE){
-    pill.className='alerta a-av';pill.textContent='Conectando al servidor... (reintentando)';
+    pill.className='alerta a-av';pill.textContent='Conectando al servidor...';
     document.getElementById('sn-srv').textContent='--';
-    // Reintentar conexion automaticamente
-    setTimeout(function(){
-      if(!SC) initSupa();
-    },3000);
+    setTimeout(function(){if(!SC)initSupa();},3000);
   }else{
-    pill.className='alerta a-err';pill.textContent='Sin conexion a internet';
+    pill.className='alerta a-err';pill.textContent='SIN INTERNET — sin acceso a datos';
     document.getElementById('sn-srv').textContent='--';
+    DB=[];updateStats();buscar();
   }
-  // Mostrar/ocultar boton subir segun estado
   var btnUp=document.getElementById('btn-upload');
-  if(btnUp) btnUp.style.display=(DB.length>0)?'block':'none';
+  if(btnUp)btnUp.style.display='none'; // ya no se necesita
 }
 function sincronizar(){
   if(!ONLINE){toast('Sin conexion a internet','err');return;}
-  if(!SC){toast('Servidor no disponible','err');return;}
+  if(!SC){
+    toast('Conectando al servidor...','av');
+    initSupa();
+    setTimeout(function(){if(SC)cargarDesdeServidor();},3000);
+    return;
+  }
   var btn=document.getElementById('btn-sync');
-  btn.innerHTML='<span class="spin"></span> SINCRONIZANDO...';btn.disabled=true;
+  if(btn){btn.innerHTML='<span class="spin"></span> CARGANDO...';btn.disabled=true;}
   SB.select('registros').then(function(res){
-    btn.innerHTML='DESCARGAR AL DISPOSITIVO';btn.disabled=false;
+    if(btn){btn.innerHTML='&#8595; RECARGAR DEL SERVIDOR';btn.disabled=false;}
     if(res.error){toast('Error: '+res.error.message,'err');return;}
-    if(res.data&&res.data.length){
-      DB=res.data.map(function(r){return Object.assign({},r,{hist:tryJ(r.hist,[]),fotos:undefined});});
-      FT={};
-      res.data.forEach(function(r){var f=tryJ(r.fotos,[]);if(f&&f.length)FT[r.id]=f;});
-      dbSave();ftSave();localStorage.setItem(KSYNC,ahora());
-      renderSync();updateStats();buscar();
-      toast(DB.length+' registros disponibles','ok');
-    }else{
-      DB=[];FT={};dbSave();ftSave();renderSync();updateStats();buscar();
-      toast('El servidor esta vacio','av');
-    }
+    DB=res.data?res.data.map(function(r){return Object.assign({},r,{hist:tryJ(r.hist,[]),fotos:undefined});}):[];
+    FT={};
+    if(res.data) res.data.forEach(function(r){var f=tryJ(r.fotos,[]);if(f&&f.length)FT[r.id]=f;});
+    localStorage.setItem(KSYNC,ahora());
+    renderSync();updateStats();buscar();renderCarousel(DB);
+    toast(DB.length+' registros en el servidor','ok');
   });
 }
 
