@@ -1497,16 +1497,9 @@ function cargarDesdeServidor(){
       if(f&&f.length) FT[x.id]=f;
     });
     localStorage.setItem(KSYNC,ahora());
-    updateStats();
-    // Asegurar panel principal visible
-    var pb=document.getElementById('pb');
-    if(pb) pb.style.display='block';
-    ['cargar','sync','menu','accesos','gestion'].forEach(function(p){
-      var e=document.getElementById('pant-'+p);
-      if(e) e.style.display='none';
-    });
-    setTimeout(function(){ renderCarousel(DB); }, 50);
-    if(DB.length) toast(DB.length+' registros en servidor','ok');
+    // Ir a buscar redibujar TODO — encabezado, buscador, carrusel, recuadros
+    ir('buscar');
+    if(DB.length) toast(DB.length+' registros cargados','ok');
   });
 }
 
