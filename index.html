@@ -2064,38 +2064,7 @@ function editarMovil(){
   hdr.appendChild(btnX);hdr.appendChild(titulo);hdr.appendChild(btnSave);
   em.appendChild(hdr);
 
-  // Fila de clave admin — oculta hasta que se toca GUARDAR
-  var claveRow=document.createElement('div');
-  claveRow.id='em-clave-row';
-  claveRow.style.cssText='align-items:center;gap:8px;padding:10px 16px;background:#0a1830;border-bottom:2px solid rgba(0,200,255,.4);';
-  claveRow.style.display='none';
-  var claveInp=document.createElement('input');
-  claveInp.id='em-clave-input';
-  claveInp.type='password';
-  claveInp.placeholder='Clave administrador';
-  claveInp.style.cssText='flex:1;background:#070d1a;border:1.5px solid rgba(0,200,255,.35);border-radius:6px;padding:11px 12px;color:#fff;font-size:16px;-webkit-appearance:none;outline:none;width:100%;box-sizing:border-box;';
-  var claveOk=document.createElement('button');
-  claveOk.textContent='CONFIRMAR';
-  claveOk.style.cssText='background:#00c8ff;border:none;color:#000;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:13px;letter-spacing:.08em;padding:11px 14px;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0;';
-  claveOk.onclick=function(){
-    if(claveInp.value===getCA()){
-      _ADM_OK=true;
-      claveRow.style.display='none';
-      claveInp.value='';
-      toast('Admin OK','ok');
-      _ejecutarGuardado();
-    } else {
-      claveInp.style.borderColor='#ff4455';
-      claveInp.value='';
-      claveInp.placeholder='Clave incorrecta';
-      setTimeout(function(){claveInp.style.borderColor='rgba(0,200,255,.35)';claveInp.placeholder='Clave administrador';},1500);
-      claveInp.focus();
-    }
-  };
-  claveInp.addEventListener('keydown',function(e){if(e.key==='Enter')claveOk.click();});
-  claveRow.appendChild(claveInp);
-  claveRow.appendChild(claveOk);
-  em.appendChild(claveRow);
+  // clave se pide via _pedirClaveGuardar()
 
   // — Estado/Tipo —
   var secTipo=document.createElement('div');
@@ -2223,18 +2192,58 @@ function _confirmarGuardar(){}
 
 function guardarEdicionMovil(){
   if(_ADM_OK){ _ejecutarGuardado(); return; }
-  var row=document.getElementById('em-clave-row');
-  var inp=document.getElementById('em-clave-input');
-  if(!row||!inp){ toast('Error interno - recargue la pagina','err'); return; }
-  // Mostrar la fila de clave
-  row.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 16px;background:#0a1830;border-bottom:2px solid rgba(0,200,255,.4);';
-  inp.value='';
-  inp.placeholder='Clave administrador';
-  inp.style.borderColor='rgba(0,200,255,.35)';
-  // Scroll al tope para que se vea
+  _pedirClaveGuardar();
+}
+function _pedirClaveGuardar(){
+  // Bajar z-index del edit-movil para que el overlay quede encima
   var em=document.getElementById('edit-movil');
-  if(em){ em.scrollTop=0; }
-  setTimeout(function(){ if(inp) inp.focus(); },200);
+  if(em) em.style.zIndex='1';
+  // Crear overlay fullscreen en body
+  var ov=document.createElement('div');
+  ov.id='clave-ov-guardar';
+  ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,5,15,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;';
+  var tit=document.createElement('div');
+  tit.textContent='CLAVE ADMINISTRADOR';
+  tit.style.cssText='font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:24px;color:#00c8ff;letter-spacing:.1em;margin-bottom:24px;text-align:center;';
+  var sub=document.createElement('div');
+  sub.textContent='Requerida para guardar cambios';
+  sub.style.cssText='font-family:Share Tech Mono,monospace;font-size:11px;color:rgba(0,200,255,.5);letter-spacing:.08em;margin-bottom:24px;text-align:center;';
+  var inp=document.createElement('input');
+  inp.type='password';
+  inp.placeholder='Ingrese clave';
+  inp.style.cssText='width:100%;max-width:280px;background:#070d1a;border:2px solid rgba(0,200,255,.5);border-radius:8px;padding:16px;color:#fff;font-size:22px;text-align:center;letter-spacing:.2em;box-sizing:border-box;-webkit-appearance:none;outline:none;margin-bottom:8px;';
+  var errMsg=document.createElement('div');
+  errMsg.textContent=' ';
+  errMsg.style.cssText='color:#ff4455;font-family:Share Tech Mono,monospace;font-size:11px;margin-bottom:20px;height:16px;text-align:center;';
+  var btnOk=document.createElement('button');
+  btnOk.textContent='CONFIRMAR Y GUARDAR';
+  btnOk.style.cssText='width:100%;max-width:280px;background:#00c8ff;border:none;color:#000;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:18px;letter-spacing:.1em;padding:16px;border-radius:8px;cursor:pointer;margin-bottom:12px;';
+  var btnCan=document.createElement('button');
+  btnCan.textContent='CANCELAR';
+  btnCan.style.cssText='width:100%;max-width:280px;background:transparent;border:1px solid rgba(255,80,80,.4);color:rgba(255,100,100,.8);font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;letter-spacing:.1em;padding:14px;border-radius:8px;cursor:pointer;';
+  function verificar(){
+    if(inp.value===getCA()){
+      _ADM_OK=true;
+      ov.remove();
+      if(em) em.style.zIndex='500';
+      _ejecutarGuardado();
+    } else {
+      errMsg.textContent='CLAVE INCORRECTA';
+      inp.style.borderColor='#ff4455';
+      inp.value='';
+      setTimeout(function(){
+        errMsg.textContent=' ';
+        inp.style.borderColor='rgba(0,200,255,.5)';
+        inp.focus();
+      },1500);
+    }
+  }
+  btnOk.onclick=verificar;
+  btnCan.onclick=function(){ov.remove();if(em)em.style.zIndex='500';};
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')verificar();});
+  ov.appendChild(tit);ov.appendChild(sub);ov.appendChild(inp);ov.appendChild(errMsg);ov.appendChild(btnOk);ov.appendChild(btnCan);
+  document.body.appendChild(ov);
+  setTimeout(function(){inp.focus();},100);
 }
 
 function _ejecutarGuardado(){
