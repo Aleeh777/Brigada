@@ -2178,23 +2178,74 @@ function editarMovil(){
 function _confirmarGuardar(){}
 
 function guardarEdicionMovil(){
-  // Verificar admin con prompt nativo — funciona siempre en cualquier contexto
-  if(!_ADM_OK){
-    var clave = window.prompt('Ingrese la clave de administrador:');
-    if(clave===null) return; // canceló
-    if(clave !== getCA()){
-      window.alert('Clave incorrecta. Intente de nuevo.');
-      return;
-    }
-    _ADM_OK = true;
-    toast('Acceso admin concedido','ok');
+  // Si ya tiene admin, guardar directo
+  if(_ADM_OK){ _ejecutarGuardado(); return; }
+
+  // Mostrar campo de clave en el header del edit-movil
+  var hdr = document.querySelector('#edit-movil > div:first-child');
+  if(!hdr) return;
+
+  // Evitar duplicar
+  if(document.getElementById('em-clave-row')) {
+    document.getElementById('em-clave-row').style.display='flex';
+    document.getElementById('em-clave-input').focus();
+    return;
   }
+
+  var row = document.createElement('div');
+  row.id = 'em-clave-row';
+  row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 16px;background:#0a1525;border-top:2px solid rgba(0,200,255,.4);position:sticky;top:56px;z-index:20;';
+
+  var inp = document.createElement('input');
+  inp.id = 'em-clave-input';
+  inp.type = 'password';
+  inp.placeholder = 'Clave admin';
+  inp.style.cssText = 'flex:1;background:#070d1a;border:1.5px solid rgba(0,200,255,.4);border-radius:6px;padding:10px 12px;color:#fff;font-size:16px;letter-spacing:.1em;-webkit-appearance:none;outline:none;';
+
+  var btnOk = document.createElement('button');
+  btnOk.textContent = 'OK';
+  btnOk.style.cssText = 'background:#00c8ff;border:none;color:#000;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:15px;letter-spacing:.1em;padding:10px 20px;border-radius:6px;cursor:pointer;white-space:nowrap;';
+
+  var btnCan = document.createElement('button');
+  btnCan.textContent = '✕';
+  btnCan.style.cssText = 'background:rgba(255,60,60,.15);border:1px solid rgba(255,60,60,.3);color:#ff6666;font-size:16px;padding:10px 14px;border-radius:6px;cursor:pointer;';
+
+  function verificar(){
+    if(inp.value === getCA()){
+      _ADM_OK = true;
+      row.style.display = 'none';
+      toast('Acceso admin OK','ok');
+      _ejecutarGuardado();
+    } else {
+      inp.style.borderColor = '#ff4455';
+      inp.value = '';
+      inp.placeholder = 'INCORRECTA — intente de nuevo';
+      setTimeout(function(){ inp.style.borderColor='rgba(0,200,255,.4)'; inp.placeholder='Clave admin'; },1500);
+      inp.focus();
+    }
+  }
+
+  btnOk.onclick = verificar;
+  btnCan.onclick = function(){ row.style.display='none'; };
+  inp.addEventListener('keydown', function(e){ if(e.key==='Enter') verificar(); });
+
+  row.appendChild(inp);
+  row.appendChild(btnOk);
+  row.appendChild(btnCan);
+
+  // Insertar después del header
+  var em = document.getElementById('edit-movil');
+  em.insertBefore(row, em.children[1] || null);
+  setTimeout(function(){ inp.focus(); }, 100);
+}
+
+function _ejecutarGuardado(){
   function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}
   var nombre=g('em-nom'),agente=g('em-age');
   if(!nombre){toast('El nombre es obligatorio','err');return;}
   if(!agente){toast('Ingrese agente responsable','err');return;}
   var r=DB.find(function(x){return x.id===EID;});
-  if(!r){toast('Registro no encontrado. EID='+EID,'err');return;}
+  if(!r){toast('Registro no encontrado','err');return;}
   var datos={
     tipo:window.EIT_TIPO||r.tipo,
     nombre:nombre,dni:g('em-dni'),alias:g('em-ali'),fnac:g('em-fnac'),
@@ -2206,21 +2257,21 @@ function guardarEdicionMovil(){
   if(!r.hist)r.hist=[];
   r.hist.push({a:'EDICION',d:'Datos actualizados.',ag:agente,f:ahora()});
   if(TMP&&TMP.length)FT[r.id]=TMP;
-  dbSave();ftSave();
   if(SC&&ONLINE){
     SB.update('registros',r.id,Object.assign({},datos,{
       fotos:JSON.stringify(FT[r.id]||[]),
       hist:JSON.stringify(r.hist)
     })).then(function(res){
-      if(res.error) toast('Error al sincronizar: '+res.error.message,'err');
-      else marcarCambio();
+      if(res.error) toast('Error al guardar: '+res.error.message,'err');
+      else { cargarDesdeServidor(); toast('Guardado en servidor','ok'); }
     });
+  } else {
+    toast('Sin internet — no se pudo guardar','err');
+    return;
   }
-  cargarDesdeServidor();
   var em=document.getElementById('edit-movil');
   if(em)em.style.display='none';
   EID=null;
-  toast('Registro actualizado','ok');
 }
 
 function _editar_orig_placeholder_unused(){
