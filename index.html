@@ -1142,7 +1142,7 @@ input,select,textarea{font-family:var(--ui)}
         <div class="phdr">02 &mdash; FOTOGRAFIA</div>
         <div class="pbod">
           <label for="inp-foto" class="fdrop" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
-            <input type="file" id="inp-foto" accept="image/*" capture="environment" multiple onchange="handleFotos(this)" style="display:none">
+            <input type="file" id="inp-foto" accept="image/*" multiple onchange="handleFotos(this)" style="display:none">
             <span class="fdico">&#128247;</span>
             <div class="fdtxt">Tocar para agregar foto<br><small style="opacity:.6;font-size:.85em">Camara o galeria</small></div>
           </label>
@@ -1971,16 +1971,17 @@ function cambiarEstado(){
 
 /* EDITAR */
 function editar(){
-  var cid=CID; if(!cid)return;
+  var cid=CID;
+  if(!cid){toast('Toque una card primero','err');return;}
+  // Cerrar sheet sin perder CID
+  var sh=document.getElementById('sheet');
+  if(sh)sh.classList.remove('open');
+  CID=cid; EID=cid;
   var isMobile=/Android|iPhone|iPad/i.test(navigator.userAgent)||window.innerWidth<768;
   if(isMobile){
-    // En móvil cerrar sheet preservando CID
-    document.getElementById('sheet').classList.remove('open');
-    CID=cid; EID=cid;
     editarMovil();
   } else {
     var r=DB.find(function(x){return x.id===cid;});if(!r)return;
-    EID=cid; closeSheet();
     function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
     TIPO=r.tipo||'PROFUGO';
     document.querySelectorAll('.topt').forEach(function(o){o.className='topt'+(o.dataset.t===TIPO?' t'+TIPO[0]:'');});
@@ -2499,69 +2500,46 @@ function sincronizar(){
 
 function subirAlServidor(){
   if(!ONLINE){toast('Sin conexion a internet','err');return;}
-  // Si SC es false, intentar reconectar primero
   if(!SC){
     toast('Conectando al servidor...','av');
     initSupa();
-    setTimeout(function(){
-      if(SC) subirAlServidor();
-      else toast('No se pudo conectar al servidor. Verifique Supabase.','err');
-    },4000);
+    setTimeout(function(){if(SC)subirAlServidor();else toast('No se pudo conectar al servidor','err');},4000);
     return;
   }
   if(!DB||!DB.length){toast('No hay datos locales para subir','av');return;}
-  if(!confirm('Subir '+DB.length+' registros al servidor? Esto reemplazara los datos del servidor.'))return;
-
+  if(!confirm('Subir '+DB.length+' registros al servidor?'))return;
   var btn=document.getElementById('btn-upload');
   if(btn){btn.disabled=true;btn.textContent='SUBIENDO...';}
   toast('Subiendo '+DB.length+' registros...','av');
-
-  // Primero borrar todos los registros del servidor
-  sbReq('DELETE','registros?id=gt.0',null,null).then(function(){
-    // Subir uno por uno
-    var i=0;
-    function subirSiguiente(){
-      if(i>=DB.length){
-        if(btn){btn.disabled=false;btn.textContent='SUBIR AL SERVIDOR';}
-        toast('Subida completa: '+DB.length+' registros','ok');
-        localStorage.setItem(KSYNC,ahora());
-        return;
-      }
-      var r=DB[i];
-      var payload=Object.assign({},r,{
-        fotos:JSON.stringify(FT[r.id]||[]),
-        hist:JSON.stringify(r.hist||[])
-      });
-      // Quitar id para que Supabase lo asigne (si es id local)
-      SB.insert('registros',payload).then(function(res){
-        if(res.error) toast('Error en registro '+(i+1)+': '+res.error.message,'err');
-        i++;
-        subirSiguiente();
-      });
+  var i=0;var errores=0;
+  function siguiente(){
+    if(i>=DB.length){
+      if(btn){btn.disabled=false;btn.textContent='\u2191 SUBIR LOCAL AL SERVIDOR';}
+      var msg=errores?'Subida con '+errores+' errores':'Subida completa: '+DB.length+' registros';
+      toast(msg,errores?'err':'ok');
+      localStorage.setItem(KSYNC,ahora());
+      renderSync();
+      return;
     }
-    subirSiguiente();
-  }).catch(function(e){
-    if(btn){btn.disabled=false;btn.textContent='SUBIR AL SERVIDOR';}
-    // Si no se puede borrar, intentar upsert directo
-    toast('Sincronizando por upsert...','av');
-    var i=0;
-    function upsertSiguiente(){
-      if(i>=DB.length){
-        if(btn){btn.disabled=false;btn.textContent='SUBIR AL SERVIDOR';}
-        toast('Sincronizado: '+DB.length+' registros','ok');
-        return;
-      }
-      var r=DB[i];
-      var payload=Object.assign({},r,{
-        fotos:JSON.stringify(FT[r.id]||[]),
-        hist:JSON.stringify(r.hist||[])
-      });
-      sbReq('POST','registros',payload,{'Prefer':'resolution=merge-duplicates,return=minimal'}).then(function(){
-        i++; upsertSiguiente();
-      });
-    }
-    upsertSiguiente();
-  });
+    var r=DB[i];
+    var payload={
+      tipo:r.tipo,dni:r.dni||'',nombre:r.nombre||'',alias:r.alias||'',
+      fnac:r.fnac||'',dom:r.dom||'',des:r.des||'',veh:r.veh||'',fam:r.fam||'',
+      delito:r.delito||'',causa:r.causa||'',prov:r.prov||'',juz:r.juz||'',
+      obs:r.obs||'',agente:r.agente||'',motivo:r.motivo||'',lugar:r.lugar||'',
+      fecha:r.fecha||ahora(),
+      fotos:JSON.stringify(FT[r.id]||[]),
+      hist:JSON.stringify(r.hist||[])
+    };
+    // Upsert: si tiene id lo incluimos para respetar el original
+    if(r.id) payload.id=r.id;
+    sbReq('POST','registros',payload,{'Prefer':'resolution=merge-duplicates,return=minimal'})
+    .then(function(res){
+      if(!res.ok) errores++;
+      i++; siguiente();
+    }).catch(function(){errores++;i++;siguiente();});
+  }
+  siguiente();
 }
 
 /* ACCESOS */
@@ -2809,6 +2787,13 @@ if(restaurarSes()){
   actualizarBarraSesion();iniciarTimerSesion();iniciarPolling();
   pushState('buscar');initSupa();
   mostrarAdvertenciaRestore();
+  // Registrar ingreso por restauracion de sesion
+  setTimeout(function(){
+    var acc={nombre:USR.nombre,cargo:USR.cargo,fecha:ahora(),tipo:'INGRESO'};
+    ACC.unshift(acc);accSave();
+    if(SC&&ONLINE)SB.insert('accesos',acc).then(function(){});
+    else setTimeout(function(){if(SC&&ONLINE)SB.insert('accesos',acc).then(function(){});},5000);
+  },2000);
 }
 // verClave unificada — ver función verClave() arriba
 
