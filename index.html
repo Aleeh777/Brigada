@@ -1481,13 +1481,13 @@ function sbReq(method,path,body,xh){
   .catch(function(e){return{ok:false,status:0,data:null,error:e.message};});
 }
 function cargarDesdeServidor(){
-  if(!SC||!ONLINE) return;
+  if(!ONLINE){toast('Sin internet','err');return;}
+  if(!SC){initSupa();setTimeout(cargarDesdeServidor,3000);return;}
   SB.select('registros').then(function(res){
     if(res.error||!res.data){
-      toast('Error cargando datos: '+(res.error?res.error.message:'sin datos'),'err');
+      toast('Error: '+(res.error?res.error.message:'sin datos'),'err');
       return;
     }
-    // Reemplazar DB completamente con datos del servidor
     DB=res.data.map(function(x){
       return Object.assign({},x,{hist:tryJ(x.hist,[]),fotos:undefined});
     });
@@ -1498,9 +1498,15 @@ function cargarDesdeServidor(){
     });
     localStorage.setItem(KSYNC,ahora());
     updateStats();
-    buscar();
-    renderCarousel(DB);
-    if(DB.length) toast(DB.length+' registros cargados','ok');
+    // Asegurar panel principal visible
+    var pb=document.getElementById('pb');
+    if(pb) pb.style.display='block';
+    ['cargar','sync','menu','accesos','gestion'].forEach(function(p){
+      var e=document.getElementById('pant-'+p);
+      if(e) e.style.display='none';
+    });
+    setTimeout(function(){ renderCarousel(DB); }, 50);
+    if(DB.length) toast(DB.length+' registros en servidor','ok');
   });
 }
 
@@ -1539,9 +1545,10 @@ var SB={
   del:function(t,id){return sbReq('DELETE',t+'?id=eq.'+id).then(function(r){
     return{error:r.ok?null:{message:'HTTP '+r.status}};
   });},
-  count:function(t){return sbReq('GET',t+'?select=id',null,{'Prefer':'count=exact','Range':'0-0'}).then(function(r){
-    return Array.isArray(r.data)?r.data.length:0;
-  });}
+  count:function(t){
+    // Usar el DB ya cargado para mostrar el count correcto
+    return Promise.resolve(DB.length);
+  }
 };
 
 /* Auto-sync al conectar: descarga todos los registros del servidor */
@@ -1633,7 +1640,7 @@ function doLogin(){
   USR={nombre:nom,cargo:car,ts:ahora()};
   var acc={nombre:nom,cargo:car,fecha:ahora(),tipo:'INGRESO'};
   ACC.unshift(acc);accSave();
-  if(SC&&ONLINE)SB.insert('accesos',acc).then(function(){});
+  if(SC&&ONLINE)SB.insert('accesos',acc).then(function(r){if(r&&r.error)console.log('acc err:',r.error.message);});
   document.getElementById('scr-login').classList.add('gone');
   document.getElementById('app').classList.add('on');
   document.getElementById('pb').style.display='block';
@@ -1658,7 +1665,7 @@ function doLogout(){
   if(!confirm('Cerrar sesion del sistema?'))return;
   var acc={nombre:USR.nombre,cargo:USR.cargo,fecha:ahora(),tipo:'EGRESO'};
   ACC.unshift(acc);accSave();
-  if(SC&&ONLINE)SB.insert('accesos',acc).then(function(){});
+  if(SC&&ONLINE)SB.insert('accesos',acc).then(function(r){if(r&&r.error)console.log('acc err:',r.error.message);});
   limpiarSesActiva();
   clearInterval(_sesTimer);clearInterval(_pollTimer);
   USR=null;SC=false;
