@@ -1214,7 +1214,8 @@ input,select,textarea{font-family:var(--ui)}
           <div style="font-family:var(--mono);font-size:var(--f9);color:var(--dim)" id="sync-last">Ultima sincronizacion: Nunca</div>
         </div>
       </div>
-      <button class="btn bp bfw" id="btn-sync" onclick="sincronizar()">DESCARGAR AL DISPOSITIVO</button>
+      <button class="btn bp bfw" style="margin-bottom:10px;background:rgba(0,200,100,.15);border-color:rgba(0,200,100,.4);color:#00e676" id="btn-upload" onclick="subirAlServidor()">&#8593; SUBIR LOCAL AL SERVIDOR</button>
+      <button class="btn bw bfw" id="btn-sync" onclick="sincronizar()">&#8595; DESCARGAR AL DISPOSITIVO</button>
       <div class="panel">
         <div class="phdr">COMO FUNCIONA</div>
         <div class="pbod" style="font-family:var(--mono);font-size:var(--f11);color:var(--dim);gap:clamp(7px,1.8vw,10px);line-height:1.9">
@@ -2460,12 +2461,19 @@ function renderSync(){
     pill.className='alerta a-ok';pill.textContent='Conectado al servidor Supabase';
     SB.count('registros').then(function(n){document.getElementById('sn-srv').textContent=n;});
   }else if(ONLINE){
-    pill.className='alerta a-av';pill.textContent='Conectando al servidor...';
+    pill.className='alerta a-av';pill.textContent='Conectando al servidor... (reintentando)';
     document.getElementById('sn-srv').textContent='--';
+    // Reintentar conexion automaticamente
+    setTimeout(function(){
+      if(!SC) initSupa();
+    },3000);
   }else{
-    pill.className='alerta a-av';pill.textContent='Sin conexion - solo busqueda local';
+    pill.className='alerta a-err';pill.textContent='Sin conexion a internet';
     document.getElementById('sn-srv').textContent='--';
   }
+  // Mostrar/ocultar boton subir segun estado
+  var btnUp=document.getElementById('btn-upload');
+  if(btnUp) btnUp.style.display=(DB.length>0)?'block':'none';
 }
 function sincronizar(){
   if(!ONLINE){toast('Sin conexion a internet','err');return;}
@@ -2490,9 +2498,17 @@ function sincronizar(){
 }
 
 function subirAlServidor(){
-  // Sube TODOS los registros del localStorage a Supabase
-  if(!ONLINE){toast('Sin conexion','err');return;}
-  if(!SC){toast('Servidor no disponible','err');return;}
+  if(!ONLINE){toast('Sin conexion a internet','err');return;}
+  // Si SC es false, intentar reconectar primero
+  if(!SC){
+    toast('Conectando al servidor...','av');
+    initSupa();
+    setTimeout(function(){
+      if(SC) subirAlServidor();
+      else toast('No se pudo conectar al servidor. Verifique Supabase.','err');
+    },4000);
+    return;
+  }
   if(!DB||!DB.length){toast('No hay datos locales para subir','av');return;}
   if(!confirm('Subir '+DB.length+' registros al servidor? Esto reemplazara los datos del servidor.'))return;
 
