@@ -1102,22 +1102,18 @@ input,select,textarea{font-family:var(--ui)}
 
       <!-- 4 RECUADROS -->
       <div style="padding:0 14px 12px;">
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
           <div onclick="abrirLista('PROFUGO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(204,14,34,.3);border-top:2px solid #cc0e22;border-radius:4px;padding:10px 4px 8px;text-align:center;">
             <div id="sp" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,28px);color:#cc0e22;line-height:1;">0</div>
             <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(204,14,34,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;">PROFUGOS</div>
-          </div>
-          <div onclick="abrirLista('CAPTURA')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(224,112,0,.3);border-top:2px solid #e07000;border-radius:4px;padding:10px 4px 8px;text-align:center;">
-            <div id="sc" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,28px);color:#e07000;line-height:1;">0</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(224,112,0,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;">PEDIDOS</div>
           </div>
           <div onclick="abrirLista('DETENIDO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(5,150,105,.3);border-top:2px solid #059669;border-radius:4px;padding:10px 4px 8px;text-align:center;">
             <div id="sd" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,28px);color:#059669;line-height:1;">0</div>
             <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(5,150,105,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;">DETENIDOS</div>
           </div>
-          <div onclick="abrirLista('SINPEDIDO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(124,58,237,.3);border-top:2px solid #7c3aed;border-radius:4px;padding:10px 4px 8px;text-align:center;">
-            <div id="ss" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,28px);color:#7c3aed;line-height:1;">0</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(124,58,237,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;">SIN PEDIDO</div>
+          <div onclick="abrirLista('DEMORADO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(224,112,0,.3);border-top:2px solid #e07000;border-radius:4px;padding:10px 4px 8px;text-align:center;">
+            <div id="sc" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,28px);color:#e07000;line-height:1;">0</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(224,112,0,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;">DEMORADOS</div>
           </div>
         </div>
       </div>
@@ -1190,6 +1186,26 @@ input,select,textarea{font-family:var(--ui)}
         <div class="phdr">05 &mdash; OBSERVACIONES Y RESPONSABLE</div>
         <div class="pbod">
           <div class="fg"><label class="flbl">Observaciones</label><textarea class="fta" id="f-obs" placeholder="Vinculos, alertas, informacion adicional..."></textarea></div>
+          <div class="fg"><label class="flbl">Division que trajo *</label>
+            <select class="fi" id="f-div" style="background:#0a1220;color:#e8f0fe;border:1px solid rgba(0,200,255,.2);border-radius:4px;padding:12px;font-family:Share Tech Mono,monospace;font-size:13px;">
+              <option value="">-- Seleccionar division --</option>
+              <option value="DIV. ROBOS Y HURTOS">DIV. ROBOS Y HURTOS</option>
+              <option value="DIV. DELITOS TELEMATICOS Y ECONOMICOS">DIV. DELITOS TELEMATICOS Y ECONOMICOS</option>
+              <option value="DIV. SUSTRACCION DE AUTOMOTORES">DIV. SUSTRACCION DE AUTOMOTORES</option>
+              <option value="DIV. HOMICIDIOS">DIV. HOMICIDIOS</option>
+              <option value="DIV. DELITOS CONTRA LAS PERSONAS">DIV. DELITOS CONTRA LAS PERSONAS</option>
+              <option value="DIV. BUSQUEDA Y CAPTURAS DE PROFUGOS">DIV. BUSQUEDA Y CAPTURAS DE PROFUGOS</option>
+              <option value="U.I.C.y.D.C. - EL MANANTIAL SUR">U.I.C.y.D.C. - EL MANANTIAL SUR</option>
+              <option value="U.I.C.y.D.C. - LA REDUCCION - LULES">U.I.C.y.D.C. - LA REDUCCION - LULES</option>
+              <option value="U.I.C.y.D.C. - ESTE">U.I.C.y.D.C. - ESTE</option>
+              <option value="U.I.C.y.D.C. - YERBA BUENA">U.I.C.y.D.C. - YERBA BUENA</option>
+              <option value="U.I.C.y.D.C. - LAS TALITAS">U.I.C.y.D.C. - LAS TALITAS</option>
+              <option value="U.I.C.y.D.C. - LOMAS DE TAFI">U.I.C.y.D.C. - LOMAS DE TAFI</option>
+              <option value="U.I.C.y.D.C. - BANDA DEL RIO SALI">U.I.C.y.D.C. - BANDA DEL RIO SALI</option>
+              <option value="DIR. GRAL. SEGURIDAD VIAL">DIR. GRAL. SEGURIDAD VIAL</option>
+              <option value="OTRA DEPENDENCIA">OTRA DEPENDENCIA</option>
+            </select></div>
+          <div class="fg"><label class="flbl">Personal que trajo *</label><input class="fi" id="f-per" placeholder="Nombre y rango del personal"></div>
           <div class="fg"><label class="flbl">Agente que Carga *</label><input class="fi" id="f-age" placeholder="Nombre y rango del agente"></div>
         </div>
       </div>
@@ -1714,9 +1730,9 @@ function ir(id){
 /* STATS */
 function updateStats(){
   var p=0,c=0,d=0,s=0;
-  DB.forEach(function(r){var e=ef(r);if(e==='PROFUGO')p++;else if(e==='CAPTURA')c++;else if(e==='DETENIDO')d++;else if(e==='SINPEDIDO')s++;});
-  ['sp','sc','sd','ss'].forEach(function(id,i){document.getElementById(id).textContent=[p,c,d,s][i];});
-  var b=document.getElementById('bnb'),a=p+c;b.textContent=a;b.style.display=a?'block':'none';
+  DB.forEach(function(r){var e=ef(r);if(e==='PROFUGO')p++;else if(e==='DETENIDO')c++;else if(e==='DEMORADO')d++;});
+  ['sp','sd','sc'].forEach(function(id,i){var el=document.getElementById(id);if(el)el.textContent=[p,c,d][i];});
+  var b=document.getElementById('bnb'),a=p+c+d;if(b){b.textContent=a;b.style.display=a?'block':'none';}
 }
 function buscar(){
   // Actualizar carrusel y stats con los datos actuales
@@ -2060,7 +2076,11 @@ function editarMovil(){
   var btnSave=document.createElement('button');
   btnSave.textContent='GUARDAR';
   btnSave.style.cssText='background:rgba(0,200,255,.15);border:1px solid rgba(0,200,255,.4);color:#00c8ff;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;padding:9px 18px;cursor:pointer;border-radius:4px;';
-  btnSave.onclick=guardarEdicionMovil;
+  btnSave.onclick=function(){
+    // Ocultar edit-movil y mostrar pantalla de clave
+    em.style.display='none';
+    _mostrarPantallaClave();
+  };
   hdr.appendChild(btnX);hdr.appendChild(titulo);hdr.appendChild(btnSave);
   em.appendChild(hdr);
 
@@ -2077,9 +2097,8 @@ function editarMovil(){
   gridTipo.style.cssText='display:grid;grid-template-columns:repeat(2,1fr);gap:6px;';
   var tipos=[
     {k:'PROFUGO',lbl:'PROFUGO',c:'#cc0e22'},
-    {k:'CAPTURA',lbl:'PEDIDO CAPTURA',c:'#e07000'},
     {k:'DETENIDO',lbl:'DETENIDO',c:'#059669'},
-    {k:'SINPEDIDO',lbl:'SIN PEDIDO',c:'#7c3aed'}
+    {k:'DEMORADO',lbl:'DEMORADO',c:'#e07000'}
   ];
   tipos.forEach(function(t){
     var b=document.createElement('button');
@@ -2169,17 +2188,34 @@ function editarMovil(){
     ['DESCRIPCION FISICA','em-des',r.des||''],
     ['MOTIVO','em-mot',r.motivo||''],
     ['OBSERVACION','em-obs',r.obs||''],
+    ['DIVISION QUE TRAJO *','em-div',r.division||''],
+    ['PERSONAL QUE TRAJO *','em-per',r.personal||''],
     ['AGENTE RESPONSABLE *','em-age',r.agente||'']
   ];
+  var divOptions=['','DIV. ROBOS Y HURTOS','DIV. DELITOS TELEMATICOS Y ECONOMICOS','DIV. SUSTRACCION DE AUTOMOTORES','DIV. HOMICIDIOS','DIV. DELITOS CONTRA LAS PERSONAS','DIV. BUSQUEDA Y CAPTURAS DE PROFUGOS','U.I.C.y.D.C. - EL MANANTIAL SUR','U.I.C.y.D.C. - LA REDUCCION - LULES','U.I.C.y.D.C. - ESTE','U.I.C.y.D.C. - YERBA BUENA','U.I.C.y.D.C. - LAS TALITAS','U.I.C.y.D.C. - LOMAS DE TAFI','U.I.C.y.D.C. - BANDA DEL RIO SALI','DIR. GRAL. SEGURIDAD VIAL','OTRA DEPENDENCIA'];
   campos.forEach(function(c){
-    var wrap=document.createElement('div');wrap.style.marginBottom='12px;';
+    var wrap=document.createElement('div');wrap.style.marginBottom='12px';
     var lbl2=document.createElement('div');
     lbl2.style.cssText='font-family:"Share Tech Mono",monospace;font-size:8px;color:rgba(0,200,255,.5);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;';
     lbl2.textContent=c[0];
-    var inp2=document.createElement('input');
-    inp2.id=c[1];inp2.type='text';inp2.value=c[2];
-    inp2.style.cssText='width:100%;background:#0a1220;border:1px solid rgba(0,200,255,.2);border-radius:4px;padding:12px;color:#e8f0fe;font-family:"Share Tech Mono",monospace;font-size:13px;box-sizing:border-box;-webkit-appearance:none;margin-bottom:10px;';
-    wrap.appendChild(lbl2);wrap.appendChild(inp2);
+    wrap.appendChild(lbl2);
+    if(c[1]==='em-div'){
+      var sel=document.createElement('select');
+      sel.id='em-div';
+      sel.style.cssText='width:100%;background:#0a1220;border:1px solid rgba(0,200,255,.2);border-radius:4px;padding:12px;color:#e8f0fe;font-family:"Share Tech Mono",monospace;font-size:13px;box-sizing:border-box;-webkit-appearance:none;margin-bottom:10px;';
+      divOptions.forEach(function(d){
+        var opt=document.createElement('option');
+        opt.value=d;opt.textContent=d||'-- Seleccionar division --';
+        if(d===c[2])opt.selected=true;
+        sel.appendChild(opt);
+      });
+      wrap.appendChild(sel);
+    } else {
+      var inp2=document.createElement('input');
+      inp2.id=c[1];inp2.type='text';inp2.value=c[2];
+      inp2.style.cssText='width:100%;background:#0a1220;border:1px solid rgba(0,200,255,.2);border-radius:4px;padding:12px;color:#e8f0fe;font-family:"Share Tech Mono",monospace;font-size:13px;box-sizing:border-box;-webkit-appearance:none;margin-bottom:10px;';
+      wrap.appendChild(inp2);
+    }
     secCampos.appendChild(wrap);
   });
   em.appendChild(secCampos);
@@ -2190,9 +2226,78 @@ function editarMovil(){
 
 function _confirmarGuardar(){}
 
-function guardarEdicionMovil(){
+function _mostrarPantallaClave(){
   if(_ADM_OK){ _ejecutarGuardado(); return; }
-  _pedirClaveGuardar();
+  var sc=document.getElementById('scr-clave-guardar');
+  if(!sc){
+    sc=document.createElement('div');
+    sc.id='scr-clave-guardar';
+    sc.style.cssText='position:fixed;inset:0;z-index:600;background:#03070e;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;';
+    document.body.appendChild(sc);
+  }
+  sc.innerHTML='';
+  sc.style.display='flex';
+
+  var ico=document.createElement('div');
+  ico.textContent='GUARDAR CAMBIOS';
+  ico.style.cssText='font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:26px;color:#00c8ff;letter-spacing:.1em;margin-bottom:10px;text-align:center;';
+
+  var sub=document.createElement('div');
+  sub.textContent='Ingrese clave de administrador';
+  sub.style.cssText='font-family:Share Tech Mono,monospace;font-size:11px;color:rgba(0,200,255,.5);letter-spacing:.08em;margin-bottom:28px;text-align:center;';
+
+  var inp=document.createElement('input');
+  inp.id='scr-clave-inp';
+  inp.type='password';
+  inp.placeholder='Clave admin';
+  inp.autocomplete='off';
+  inp.style.cssText='width:100%;max-width:300px;background:#070d1a;border:2px solid rgba(0,200,255,.5);border-radius:8px;padding:18px;color:#fff;font-size:24px;text-align:center;letter-spacing:.2em;box-sizing:border-box;-webkit-appearance:none;outline:none;';
+
+  var err=document.createElement('div');
+  err.style.cssText='color:#ff4455;font-family:Share Tech Mono,monospace;font-size:11px;margin-top:10px;height:16px;text-align:center;';
+
+  var btnOk=document.createElement('button');
+  btnOk.textContent='CONFIRMAR Y GUARDAR';
+  btnOk.style.cssText='width:100%;max-width:300px;background:#00c8ff;border:none;color:#000;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:18px;letter-spacing:.08em;padding:18px;border-radius:8px;cursor:pointer;margin-top:20px;';
+
+  var btnVolver=document.createElement('button');
+  btnVolver.textContent='VOLVER A EDITAR';
+  btnVolver.style.cssText='width:100%;max-width:300px;background:transparent;border:1px solid rgba(0,200,255,.3);color:rgba(0,200,255,.7);font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;letter-spacing:.08em;padding:14px;border-radius:8px;cursor:pointer;margin-top:10px;';
+
+  function verificar(){
+    if(inp.value===getCA()){
+      _ADM_OK=true;
+      sc.style.display='none';
+      _ejecutarGuardado();
+    } else {
+      err.textContent='CLAVE INCORRECTA';
+      inp.style.borderColor='#ff4455';
+      inp.value='';
+      setTimeout(function(){
+        err.textContent='';
+        inp.style.borderColor='rgba(0,200,255,.5)';
+        inp.focus();
+      },1500);
+    }
+  }
+
+  btnOk.onclick=verificar;
+  btnVolver.onclick=function(){
+    sc.style.display='none';
+    var em=document.getElementById('edit-movil');
+    if(em) em.style.display='block';
+  };
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')verificar();});
+
+  sc.appendChild(ico);sc.appendChild(sub);sc.appendChild(inp);sc.appendChild(err);
+  sc.appendChild(btnOk);sc.appendChild(btnVolver);
+  setTimeout(function(){inp.focus();},100);
+}
+
+function guardarEdicionMovil(){
+  var em=document.getElementById('edit-movil');
+  if(em) em.style.display='none';
+  _mostrarPantallaClave();
 }
 function _pedirClaveGuardar(){
   // Bajar z-index del edit-movil para que el overlay quede encima
@@ -2258,7 +2363,8 @@ function _ejecutarGuardado(){
     nombre:nombre,dni:g('em-dni'),alias:g('em-ali'),fnac:g('em-fnac'),
     edad:g('em-age2'),dom:g('em-dom'),delito:g('em-del'),causa:g('em-cau'),
     juz:g('em-juz'),veh:g('em-veh'),fam:g('em-fam'),des:g('em-des'),
-    motivo:g('em-mot'),obs:g('em-obs'),agente:agente
+    motivo:g('em-mot'),obs:g('em-obs'),agente:agente,
+    division:g('em-div'),personal:g('em-per')
   };
   Object.assign(r,datos);
   if(!r.hist)r.hist=[];
@@ -2485,7 +2591,8 @@ function doRegistrar(){
     tipo:TIPO,dni:g('f-dni'),nombre:nombre,alias:g('f-ali'),
     fnac:g('f-fnac'),dom:g('f-dom'),des:g('f-des'),veh:g('f-veh'),fam:g('f-fam'),
     delito:g('f-del'),causa:g('f-cau'),prov:document.getElementById('f-pro').value,
-    juz:g('f-juz'),obs:g('f-obs'),agente:agente,motivo:g('f-mot'),lugar:g('f-lug')
+    juz:g('f-juz'),obs:g('f-obs'),agente:agente,motivo:g('f-mot'),lugar:g('f-lug'),
+    division:g('f-div'),personal:g('f-per')
   };
   setTimeout(function(){
     if(EID){
@@ -2886,8 +2993,8 @@ var _swipeX=0, _swipeY=0, _swipeLock=false;
 
 function mkWCard(r){
   var cat=r.categoria||'PROFUGO';
-  var BL={PROFUGO:'PROFUGO',CAPTURA:'PEDIDO',SINPEDIDO:'SIN PEDIDO',DETENIDO:'DETENIDO'};
-  var BC={PROFUGO:'#cc0e22',CAPTURA:'#e07000',SINPEDIDO:'#7c3aed',DETENIDO:'#059669'};
+  var BL={PROFUGO:'PROFUGO',DETENIDO:'DETENIDO',DEMORADO:'DEMORADO'};
+  var BC={PROFUGO:'#cc0e22',DETENIDO:'#059669',DEMORADO:'#e07000'};
 
   var fo=FT[r.id]||[];
   var nom=r.nombre?r.nombre.split(',')[0].substring(0,22):'SIN NOMBRE';
