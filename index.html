@@ -1567,50 +1567,79 @@ function abrirBlocRapido(){
 
 function _parsearBloc(txt){
   if(!txt.trim()){toast('Bloc vacio','err');return;}
-  var t=txt.replace(/\r/g,'').replace(/\t/g,' ');
-  var linea=t.replace(/\n/g,' ').replace(/\s{2,}/g,' ');
+  var t=txt.replace(/\r/g,'');
+  // Unir todo en una sola linea
+  var L=t.replace(/\n/g,' ').replace(/\s{2,}/g,' ').trim();
   var lines=t.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+
   function sv(id,v){var e=document.getElementById(id);if(e&&v&&(''+v).trim())e.value=(''+v).trim();}
-  function limpNum(s){return s?s.replace(/\./g,'').replace(/,/g,'').trim():'';}
-  function buscar(pats){
-    var fuentes=[linea].concat(lines);
-    for(var p=0;p<pats.length;p++){
-      for(var f=0;f<fuentes.length;f++){
-        var m=fuentes[f].match(pats[p]);
-        if(m&&m[1]&&m[1].trim().length>0) return m[1].trim();
-      }
-    }
-    return '';
-  }
+  function limpNum(s){return (s||'').replace(/[^0-9]/g,'');}
+
+  // NOMBRE: todo antes de la primera coma (formato: APELLIDO NOMBRE, ...)
   var nombre='';
-  nombre=buscar([/NOMBRE[S]?\s*[:\-]\s*([A-Z\xc0-\xff ]{3,})/i]);
+  var m=L.match(/^([A-ZÀ-ÿ][A-Za-zÀ-ÿ ]{2,}?)(?:,|\s+argentino|\s+DNI|\s+de\s+\d)/i);
+  if(m) nombre=m[1].trim().toUpperCase();
   if(!nombre){
+    // Primera linea sin ":" y sin numeros
     for(var i=0;i<lines.length;i++){
       var l=lines[i].replace(/,.*$/,'').trim();
-      if(!l.includes(':')&&!/\d/.test(l)&&l.length>3&&/[A-Za-z\xc0-\xff]/.test(l)){
-        nombre=l.toUpperCase();break;
-      }
+      if(!l.includes(':')&&!/^\d/.test(l)&&l.length>3){{nombre=l.toUpperCase();break;}}
     }
   }
-  if(!nombre){
-    var m0=linea.match(/^([A-Z\xc0-\xff ]{4,}?)(?:\s*,|\s+DNI|\s+DE\s+\d)/i);
-    if(m0) nombre=m0[1].trim().toUpperCase();
-  }
-  var dniRaw=buscar([/DNI\s*[:\-]?\s*([\d\. ]{6,12})/i,/D\.N\.I\.?\s*[:\-]?\s*([\d\. ]{6,12})/i]);
-  var dni=limpNum(dniRaw);
-  if(!dni){var m1=linea.match(/\b(\d{7,8})\b/);if(m1)dni=m1[1];}
-  var fnac=buscar([/F\.?N\.?\s*[:\-]?\s*(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i,/NACIMIENTO\s*[:\-]?\s*(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i,/NAC\.?\s*[:\-]?\s*(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i]);
-  var edad=buscar([/EDAD\s*[:\-]?\s*(\d{1,3})/i,/DE\s+(\d{1,3})\s+A/i,/,\s*(\d{1,3})\s+A/i,/(\d{1,3})\s*A[NÑ]OS/i]);
-  var dom=buscar([/D\.?L\.?I\.?O\.?\s*[:\-]?\s*(.{5,60})/i,/DLIO\s*[:\-]?\s*(.{5,60})/i,/DOMICILIO\s*[:\-]?\s*(.{5,60})/i,/DOM\.?\s*[:\-]?\s*(.{5,60})/i,/VIVE\s+EN\s+(.{5,60})/i]);
-  var zona=buscar([/B[o°]\s*[:\-]?\s*(.{3,40})/i,/BARRIO\s*[:\-]?\s*(.{3,40})/i,/ZONA\s*[:\-]?\s*(.{3,40})/i]);
-  var alias=buscar([/ALIAS\s*[:\-]?\s*(.{2,30})/i,/APODO\s*[:\-]?\s*(.{2,30})/i]);
-  var delito=buscar([/DELITO\s*[:\-]?\s*(.{3,60})/i,/IMPUTADO\s+(?:POR\s+)?(.{3,60})/i,/ART(?:ICULO)?\s*[:\-]?\s*(.{3,60})/i]);
-  var causa=buscar([/CAUSA\s*[:\-]?\s*([\w\/\- ]{3,40})/i,/EXPTE?\s*[:\-]?\s*([\w\/\- ]{3,40})/i]);
-  sv('f-nom',nombre);sv('f-dni',dni);sv('f-fnac',fnac);sv('f-edad',edad);
-  sv('f-dom',dom);sv('f-zona',zona);sv('f-ali',alias);sv('f-del',delito);sv('f-cau',causa);
-  var n=[nombre,dni,dom,fnac,delito].filter(function(v){return v&&v.length>1;}).length;
-  toast(n+' campos detectados','ok');
+
+  // DNI: buscar "DNI Nro. XXXXXXXX" o "DNI: XXXXXXXX"
+  var dni='';
+  var dm=L.match(/DNI\s+(?:Nro\.?|N[°º]|:)?\s*([\d\.]{7,11})/i);
+  if(dm) dni=limpNum(dm[1]);
+  if(!dni){var dm2=L.match(/\b(\d{7,8})\b/);if(dm2)dni=dm2[1];}
+
+  // EDAD: "de X años de edad" o "DE X AÑOS"
+  var edad='';
+  var em2=L.match(/de\s+(\d{1,3})\s+a[nñ]os/i);
+  if(em2) edad=em2[1];
+
+  // FECHA NACIMIENTO: "FN DD/MM/AAAA" o "FN: DD/MM/AAAA"
+  var fnac='';
+  var fm=L.match(/F\.?N\.?\s*:?\s*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/i);
+  if(fm) fnac=fm[1];
+  if(!fnac){var fm2=L.match(/nacimiento\s*:?\s*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/i);if(fm2)fnac=fm2[1];}
+
+  // DOMICILIO: "con domicilio sito en XXXX" o "domicilio en XXXX" o "DLIO: XXXX"
+  var dom='';
+  var domM=L.match(/domicilio\s+(?:sito\s+)?(?:en|:)\s+(.{5,60}?)(?:\.|,\s*(?:San\s+Miguel|Tucuman|$))/i);
+  if(domM) dom=domM[1].trim();
+  if(!dom){var domM2=L.match(/DLIO\s*:?\s*(.{5,60}?)(?:\.|,|$)/i);if(domM2)dom=domM2[1].trim();}
+  if(!dom){var domM3=L.match(/Calle\s+(.{5,60}?)(?:\.|,|$)/i);if(domM3)dom='Calle '+domM3[1].trim();}
+
+  // ZONA/BARRIO: lo que sigue al domicilio (ciudad/localidad)
+  var zona='';
+  var zonaM=L.match(/(?:domicilio[^,]+),\s*(San\s+Miguel[^,\.]*|Tucuman[^,\.]*|B[°o]\s*[A-Z][^,\.]*)/i);
+  if(zonaM) zona=zonaM[1].trim();
+  if(!zona){var zonaM2=L.match(/(?:Barrio|B[°o])\s+([A-Za-zÀ-ÿ ]+?)(?:,|\.|$)/i);if(zonaM2)zona=zonaM2[1].trim();}
+
+  // ALIAS
+  var alias='';
+  var aliM=L.match(/alias\s*:?\s*"?([A-Za-zÀ-ÿ ]+)"?/i);
+  if(aliM) alias=aliM[1].trim();
+
+  // DELITO
+  var delito='';
+  var delM=L.match(/(?:delito|imputado\s+por|cargo)\s*:?\s*(.{3,60}?)(?:\.|,|$)/i);
+  if(delM) delito=delM[1].trim();
+
+  sv('f-nom',nombre);
+  sv('f-dni',dni);
+  sv('f-edad',edad);
+  sv('f-fnac',fnac);
+  sv('f-dom',dom);
+  sv('f-zona',zona);
+  sv('f-ali',alias);
+  sv('f-del',delito);
+
+  var n=[nombre,dni,dom,fnac,edad].filter(function(v){return v&&v.length>0;}).length;
+  toast(n+' campos completados','ok');
 }
+
 
 
 
@@ -2169,17 +2198,13 @@ function editar(){
 
 function editarMovil(){
   var r=DB.find(function(x){return x.id===CID;});if(!r)return;
-  EID=CID;
-  document.getElementById('sheet').classList.remove('open');
+  EID=CID; closeSheet();
   TMP=JSON.parse(JSON.stringify(FT[r.id]||[]));
   window.EIT_TIPO = r.tipo||'PROFUGO';
 
-  // Ocultar el carousel para que no se superponga
-  var _car=document.getElementById('carousel-outer');
-  if(_car)_car.style.visibility='hidden';
   var em=document.getElementById('edit-movil');
   if(!em){em=document.createElement('div');em.id='edit-movil';document.body.appendChild(em);}
-  em.style.cssText='position:fixed;inset:0;z-index:9000;background:#03070e;overflow-y:auto;-webkit-overflow-scrolling:touch;display:block;';
+  em.style.cssText='position:fixed;inset:0;z-index:500;background:#03070e;overflow-y:auto;-webkit-overflow-scrolling:touch;display:block;';
 
   // Limpiar y construir con createElement para evitar problemas de comillas
   em.innerHTML='';
@@ -2190,11 +2215,7 @@ function editarMovil(){
   var btnX=document.createElement('button');
   btnX.innerHTML='&#10005;';
   btnX.style.cssText='background:rgba(255,50,50,.12);border:1px solid rgba(255,80,80,.25);color:rgba(255,100,100,.8);font-size:18px;width:40px;height:40px;border-radius:50%;cursor:pointer;flex-shrink:0;';
-  btnX.onclick=function(){
-    em.style.display='none';EID=null;
-    var _car=document.getElementById('carousel-outer');
-    if(_car)_car.style.visibility='visible';
-  };
+  btnX.onclick=function(){em.style.display='none';EID=null;};
   var titulo=document.createElement('div');
   titulo.style.cssText='flex:1;font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:16px;letter-spacing:.15em;color:#00c8ff;text-transform:uppercase;';
   titulo.textContent='EDITAR REGISTRO';
@@ -2202,36 +2223,21 @@ function editarMovil(){
   btnSave.textContent='GUARDAR';
   btnSave.style.cssText='background:rgba(0,200,255,.15);border:1px solid rgba(0,200,255,.4);color:#00c8ff;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;padding:9px 18px;cursor:pointer;border-radius:4px;';
   btnSave.onclick=function(){
+    // Capturar todos los valores del formulario
+    function gv(id){var e=document.getElementById(id);return e?e.value.trim():'';}
     window._EMD={
-      tipo:window.EIT_TIPO, eid:EID,
-      tmp:TMP?TMP.slice():[],
-      nom:document.getElementById('em-nom')?document.getElementById('em-nom').value.trim():'',
-      dni:document.getElementById('em-dni')?document.getElementById('em-dni').value.trim():'',
-      ali:document.getElementById('em-ali')?document.getElementById('em-ali').value.trim():'',
-      fnac:document.getElementById('em-fnac')?document.getElementById('em-fnac').value.trim():'',
-      age2:document.getElementById('em-age2')?document.getElementById('em-age2').value.trim():'',
-      dom:document.getElementById('em-dom')?document.getElementById('em-dom').value.trim():'',
-      zona:document.getElementById('em-zona')?document.getElementById('em-zona').value.trim():'',
-      del:document.getElementById('em-del')?document.getElementById('em-del').value.trim():'',
-      cau:document.getElementById('em-cau')?document.getElementById('em-cau').value.trim():'',
-      juz:document.getElementById('em-juz')?document.getElementById('em-juz').value.trim():'',
-      veh:document.getElementById('em-veh')?document.getElementById('em-veh').value.trim():'',
-      fam:document.getElementById('em-fam')?document.getElementById('em-fam').value.trim():'',
-      des:document.getElementById('em-des')?document.getElementById('em-des').value.trim():'',
-      mot:document.getElementById('em-mot')?document.getElementById('em-mot').value.trim():'',
-      obs:document.getElementById('em-obs')?document.getElementById('em-obs').value.trim():'',
-      age:document.getElementById('em-age')?document.getElementById('em-age').value.trim():'',
-      div:document.getElementById('em-div')?document.getElementById('em-div').value.trim():'',
-      per:document.getElementById('em-per')?document.getElementById('em-per').value.trim():''
+      tipo:window.EIT_TIPO, eid:EID, tmp:TMP?TMP.slice():[],
+      nom:gv('em-nom'), dni:gv('em-dni'), ali:gv('em-ali'),
+      fnac:gv('em-fnac'), age2:gv('em-age2'), dom:gv('em-dom'),
+      zona:gv('em-zona'), del:gv('em-del'), cau:gv('em-cau'),
+      juz:gv('em-juz'), veh:gv('em-veh'), fam:gv('em-fam'),
+      des:gv('em-des'), mot:gv('em-mot'), obs:gv('em-obs'),
+      age:gv('em-age'), div:gv('em-div'), per:gv('em-per')
     };
-    // Bajar z-index del formulario para que la pantalla de clave quede encima
-    em.style.zIndex='1';
     _mostrarPantallaClave();
   };
   hdr.appendChild(btnX);hdr.appendChild(titulo);hdr.appendChild(btnSave);
   em.appendChild(hdr);
-
-  // clave se pide via _pedirClaveGuardar()
 
   // — Estado/Tipo —
   var secTipo=document.createElement('div');
@@ -2244,8 +2250,9 @@ function editarMovil(){
   gridTipo.style.cssText='display:grid;grid-template-columns:repeat(2,1fr);gap:6px;';
   var tipos=[
     {k:'PROFUGO',lbl:'PROFUGO',c:'#cc0e22'},
+    {k:'CAPTURA',lbl:'PEDIDO CAPTURA',c:'#e07000'},
     {k:'DETENIDO',lbl:'DETENIDO',c:'#059669'},
-    {k:'DEMORADO',lbl:'DEMORADO',c:'#e07000'}
+    {k:'SINPEDIDO',lbl:'SIN PEDIDO',c:'#7c3aed'}
   ];
   tipos.forEach(function(t){
     var b=document.createElement('button');
@@ -2324,45 +2331,29 @@ function editarMovil(){
     ['NOMBRE *','em-nom',r.nombre||''],
     ['DNI','em-dni',r.dni||''],
     ['EDAD','em-age2',r.edad||''],
-    ['FECHA DE NACIMIENTO','em-fnac',r.fnac||''],
+    ['FECHA NACIMIENTO','em-fnac',r.fnac||''],
     ['ALIAS / APODO','em-ali',r.alias||''],
     ['DOMICILIO','em-dom',r.dom||''],
     ['ZONA / BARRIO','em-zona',r.zona||''],
-    ['DESCRIPCION FISICA','em-des',r.des||''],
-    ['VEHICULO','em-veh',r.veh||''],
     ['DELITO','em-del',r.delito||''],
     ['CAUSA JUDICIAL','em-cau',r.causa||''],
     ['JUZGADO','em-juz',r.juz||''],
-    ['MOTIVO','em-mot',r.motivo||''],
+    ['VEHICULO','em-veh',r.veh||''],
+    ['DESCRIPCION FISICA','em-des',r.des||''],
     ['OBSERVACION','em-obs',r.obs||''],
-    ['DIVISION QUE TRAJO *','em-div',r.division||''],
-    ['PERSONAL QUE TRAJO *','em-per',r.personal||''],
+    ['DIVISION QUE TRAJO','em-div',r.division||''],
+    ['PERSONAL QUE TRAJO','em-per',r.personal||''],
     ['AGENTE RESPONSABLE *','em-age',r.agente||'']
   ];
-  var divOptions=['','DIV. ROBOS Y HURTOS','DIV. DELITOS TELEMATICOS Y ECONOMICOS','DIV. SUSTRACCION DE AUTOMOTORES','DIV. HOMICIDIOS','DIV. DELITOS CONTRA LAS PERSONAS','DIV. BUSQUEDA Y CAPTURAS DE PROFUGOS','U.I.C.y.D.C. - EL MANANTIAL SUR','U.I.C.y.D.C. - LA REDUCCION - LULES','U.I.C.y.D.C. - ESTE','U.I.C.y.D.C. - YERBA BUENA','U.I.C.y.D.C. - LAS TALITAS','U.I.C.y.D.C. - LOMAS DE TAFI','U.I.C.y.D.C. - BANDA DEL RIO SALI','DIR. GRAL. SEGURIDAD VIAL','OTRA DEPENDENCIA'];
   campos.forEach(function(c){
-    var wrap=document.createElement('div');wrap.style.marginBottom='12px';
+    var wrap=document.createElement('div');wrap.style.marginBottom='12px;';
     var lbl2=document.createElement('div');
     lbl2.style.cssText='font-family:"Share Tech Mono",monospace;font-size:8px;color:rgba(0,200,255,.5);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;';
     lbl2.textContent=c[0];
-    wrap.appendChild(lbl2);
-    if(c[1]==='em-div'){
-      var sel=document.createElement('select');
-      sel.id='em-div';
-      sel.style.cssText='width:100%;background:#0a1220;border:1px solid rgba(0,200,255,.2);border-radius:4px;padding:12px;color:#e8f0fe;font-family:"Share Tech Mono",monospace;font-size:13px;box-sizing:border-box;-webkit-appearance:none;margin-bottom:10px;';
-      divOptions.forEach(function(d){
-        var opt=document.createElement('option');
-        opt.value=d;opt.textContent=d||'-- Seleccionar division --';
-        if(d===c[2])opt.selected=true;
-        sel.appendChild(opt);
-      });
-      wrap.appendChild(sel);
-    } else {
-      var inp2=document.createElement('input');
-      inp2.id=c[1];inp2.type='text';inp2.value=c[2];
-      inp2.style.cssText='width:100%;background:#0a1220;border:1px solid rgba(0,200,255,.2);border-radius:4px;padding:12px;color:#e8f0fe;font-family:"Share Tech Mono",monospace;font-size:13px;box-sizing:border-box;-webkit-appearance:none;margin-bottom:10px;';
-      wrap.appendChild(inp2);
-    }
+    var inp2=document.createElement('input');
+    inp2.id=c[1];inp2.type='text';inp2.value=c[2];
+    inp2.style.cssText='width:100%;background:#0a1220;border:1px solid rgba(0,200,255,.2);border-radius:4px;padding:12px;color:#e8f0fe;font-family:"Share Tech Mono",monospace;font-size:13px;box-sizing:border-box;-webkit-appearance:none;margin-bottom:10px;';
+    wrap.appendChild(lbl2);wrap.appendChild(inp2);
     secCampos.appendChild(wrap);
   });
   em.appendChild(secCampos);
@@ -2415,8 +2406,6 @@ function _mostrarPantallaClave(){
     if(inp.value===getCA()){
       _ADM_OK=true;
       sc.style.display='none';
-      var emr=document.getElementById('edit-movil');
-      if(emr)emr.style.zIndex='500';
       _ejecutarGuardado();
     } else {
       err.textContent='CLAVE INCORRECTA';
@@ -2434,7 +2423,7 @@ function _mostrarPantallaClave(){
   btnVolver.onclick=function(){
     sc.style.display='none';
     var em=document.getElementById('edit-movil');
-    if(em){em.style.display='block';em.style.zIndex='500';}
+    if(em)em.style.display='block';
   };
   inp.addEventListener('keydown',function(e){if(e.key==='Enter')verificar();});
 
