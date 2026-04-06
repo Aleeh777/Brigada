@@ -1102,7 +1102,7 @@ input,select,textarea{font-family:var(--ui)}
 
       <!-- 4 RECUADROS -->
       <div style="padding:0 14px 12px;">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px;">
           <div onclick="abrirLista('PROFUGO')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(204,14,34,.3);border-top:2px solid #cc0e22;border-radius:4px;padding:10px 4px 8px;text-align:center;">
             <div id="sp" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,28px);color:#cc0e22;line-height:1;">0</div>
             <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(204,14,34,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;">PROFUGOS</div>
@@ -1115,6 +1115,10 @@ input,select,textarea{font-family:var(--ui)}
             <div id="sc" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,28px);color:#e07000;line-height:1;">0</div>
             <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(224,112,0,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;">DEMORADOS</div>
           </div>
+          <div onclick="abrirLista('LIBERTAD')" style="cursor:pointer;background:#0d1525;border:1px solid rgba(59,130,246,.3);border-top:2px solid #3b82f6;border-radius:4px;padding:10px 4px 8px;text-align:center;">
+            <div id="sl" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,5vw,28px);color:#3b82f6;line-height:1;">0</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:clamp(6px,1.4vw,8px);color:rgba(59,130,246,.65);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;">CON LIBERTAD</div>
+          </div>
         </div>
       </div>
 
@@ -1126,13 +1130,11 @@ input,select,textarea{font-family:var(--ui)}
       <div class="panel">
         <div class="phdr">01 &mdash; TIPO DE REGISTRO</div>
         <div class="pbod">
-          <div class="tgrid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="tgrid" style="grid-template-columns:repeat(2,1fr);">
             <div class="topt tP" data-t="PROFUGO"  onclick="selTipo(this)"><span class="toi">&#9888;</span><div class="ton">Profugo</div><div class="tod">Pedido activo</div></div>
             <div class="topt"   data-t="DETENIDO"  onclick="selTipo(this)"><span class="toi">&#10003;</span><div class="ton">Detenido</div><div class="tod">En custodia</div></div>
             <div class="topt"   data-t="DEMORADO"  onclick="selTipo(this)"><span class="toi">&#128100;</span><div class="ton">Demorado</div><div class="tod">Fichado prev.</div></div>
-          
-
-            <div class="topt"    data-t="DETENIDO"  onclick="selTipo(this)"><span class="toi">&#10003;</span><div class="ton">Detenido</div><div class="tod">En custodia</div></div>
+            <div class="topt"   data-t="LIBERTAD"  onclick="selTipo(this)"><span class="toi">&#128275;</span><div class="ton">Con Libertad</div><div class="tod">Libertad condicional</div></div>
           </div>
         </div>
       </div>
@@ -1878,10 +1880,10 @@ function ir(id){
 
 /* STATS */
 function updateStats(){
-  var p=0,c=0,d=0,s=0;
-  DB.forEach(function(r){var e=ef(r);if(e==='PROFUGO')p++;else if(e==='DETENIDO')c++;else if(e==='DEMORADO')d++;});
-  ['sp','sd','sc'].forEach(function(id,i){var el=document.getElementById(id);if(el)el.textContent=[p,c,d][i];});
-  var b=document.getElementById('bnb'),a=p+c+d;if(b){b.textContent=a;b.style.display=a?'block':'none';}
+  var p=0,c=0,d=0,l=0;
+  DB.forEach(function(r){var e=ef(r);if(e==='PROFUGO')p++;else if(e==='DETENIDO')c++;else if(e==='DEMORADO')d++;else if(e==='LIBERTAD')l++;});
+  ['sp','sd','sc','sl'].forEach(function(id,i){var el=document.getElementById(id);if(el)el.textContent=[p,c,d,l][i];});
+  var b=document.getElementById('bnb'),a=p+c+d+l;if(b){b.textContent=a;b.style.display=a?'block':'none';}
 }
 function buscar(){
   // Actualizar carrusel y stats con los datos actuales
@@ -2252,9 +2254,9 @@ function editarMovil(){
   gridTipo.style.cssText='display:grid;grid-template-columns:repeat(2,1fr);gap:6px;';
   var tipos=[
     {k:'PROFUGO',lbl:'PROFUGO',c:'#cc0e22'},
-    {k:'CAPTURA',lbl:'PEDIDO CAPTURA',c:'#e07000'},
     {k:'DETENIDO',lbl:'DETENIDO',c:'#059669'},
-    {k:'SINPEDIDO',lbl:'SIN PEDIDO',c:'#7c3aed'}
+    {k:'DEMORADO',lbl:'DEMORADO',c:'#e07000'},
+    {k:'LIBERTAD',lbl:'CON LIBERTAD',c:'#3b82f6'}
   ];
   tipos.forEach(function(t){
     var b=document.createElement('button');
@@ -2511,24 +2513,31 @@ function _ejecutarGuardado(){
   if(!r.hist)r.hist=[];
   r.hist.push({a:'EDICION',d:'Datos actualizados.',ag:agente,f:ahora()});
   if(d.tmp&&d.tmp.length) FT[r.id]=d.tmp;
-  if(SC&&ONLINE){
-    SB.update('registros',r.id,Object.assign({},datos,{
-      fotos:JSON.stringify(FT[r.id]||[]),
-      hist:JSON.stringify(r.hist)
-    })).then(function(res){
-      if(res.error) toast('Error: '+res.error.message,'err');
-      else{
-        window._EMD=null;
-        EID=null;
-        cargarDesdeServidor();
-        toast('Registro guardado correctamente','ok');
-      }
-    });
-  } else {
-    toast('Sin internet — no se pudo guardar','err');
-  }
+  if(!navigator.onLine){toast('Sin internet','err');return;}
+  // Cerrar UI inmediatamente
   var em=document.getElementById('edit-movil');
-  if(em){em.style.display='none';em.style.zIndex='500';}
+  if(em)em.style.display='none';
+  var sc2=document.getElementById('scr-clave-guardar');
+  if(sc2)sc2.style.display='none';
+  var co=document.getElementById('carousel-outer');
+  if(co)co.style.visibility='visible';
+  // Guardar en Supabase — intentar siempre
+  toast('Guardando...','av');
+  sbReq('PATCH','registros?id=eq.'+r.id, Object.assign({},datos,{
+    fotos:JSON.stringify(FT[r.id]||[]),
+    hist:JSON.stringify(r.hist)
+  }), {'Prefer':'return=minimal'}).then(function(res){
+    if(res.ok){
+      SC=true;
+      window._EMD=null; EID=null;
+      cargarDesdeServidor();
+      toast('Guardado OK','ok');
+    } else {
+      toast('Error al guardar: HTTP '+res.status+' '+JSON.stringify(res.data),'err');
+    }
+  }).catch(function(e){
+    toast('Error de conexion: '+e,'err');
+  });
 }
 
 function _editar_orig_placeholder_unused(){
@@ -3151,8 +3160,8 @@ var _swipeX=0, _swipeY=0, _swipeLock=false;
 
 function mkWCard(r){
   var cat=ef(r)||'PROFUGO';
-  var BL={PROFUGO:'PROFUGO',DETENIDO:'DETENIDO',DEMORADO:'DEMORADO'};
-  var BC={PROFUGO:'#cc0e22',DETENIDO:'#059669',DEMORADO:'#e07000'};
+  var BL={PROFUGO:'PROFUGO',DETENIDO:'DETENIDO',DEMORADO:'DEMORADO',LIBERTAD:'CON LIBERTAD'};
+  var BC={PROFUGO:'#cc0e22',DETENIDO:'#059669',DEMORADO:'#e07000',LIBERTAD:'#3b82f6'};
 
   var fo=FT[r.id]||[];
   var nom=r.nombre?r.nombre.split(',')[0].substring(0,22):'SIN NOMBRE';
