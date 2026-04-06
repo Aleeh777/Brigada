@@ -1126,10 +1126,12 @@ input,select,textarea{font-family:var(--ui)}
       <div class="panel">
         <div class="phdr">01 &mdash; TIPO DE REGISTRO</div>
         <div class="pbod">
-          <div class="tgrid">
-            <div class="topt tP" data-t="PROFUGO"   onclick="selTipo(this)"><span class="toi">&#9888;</span><div class="ton">Profugo</div><div class="tod">Pedido activo</div></div>
-            <div class="topt"    data-t="CAPTURA"   onclick="selTipo(this)"><span class="toi">&#128196;</span><div class="ton">Pedido</div><div class="tod">Orden judicial</div></div>
-            <div class="topt"    data-t="SINPEDIDO" onclick="selTipo(this)"><span class="toi">&#128100;</span><div class="ton">Sin Pedido</div><div class="tod">Fichado prev.</div></div>
+          <div class="tgrid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="topt tP" data-t="PROFUGO"  onclick="selTipo(this)"><span class="toi">&#9888;</span><div class="ton">Profugo</div><div class="tod">Pedido activo</div></div>
+            <div class="topt"   data-t="DETENIDO"  onclick="selTipo(this)"><span class="toi">&#10003;</span><div class="ton">Detenido</div><div class="tod">En custodia</div></div>
+            <div class="topt"   data-t="DEMORADO"  onclick="selTipo(this)"><span class="toi">&#128100;</span><div class="ton">Demorado</div><div class="tod">Fichado prev.</div></div>
+          
+
             <div class="topt"    data-t="DETENIDO"  onclick="selTipo(this)"><span class="toi">&#10003;</span><div class="ton">Detenido</div><div class="tod">En custodia</div></div>
           </div>
         </div>
@@ -1751,7 +1753,7 @@ function dbSave(){/* solo online — no guardar registros en localStorage */}
 function ftSave(){/* solo online — fotos en Supabase */}
 function accSave(){localStorage.setItem(KACC,JSON.stringify(ACC));}
 function ahora(){return new Date().toLocaleString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
-function ef(r){return r.estado==='DETENIDO'?'DETENIDO':r.tipo;}
+function ef(r){return r.tipo||'PROFUGO';}
 function edad(fn){
   if(!fn||fn.length<8)return'--';
   var p=fn.split('/');if(p.length<3)return'--';
@@ -2570,8 +2572,8 @@ function selTipo(el){
   updSec(TIPO);
 }
 function updSec(t){
-  document.getElementById('sec-cau').style.display=t==='SINPEDIDO'?'none':'block';
-  document.getElementById('sec-mot').style.display=t==='SINPEDIDO'?'block':'none';
+  document.getElementById('sec-cau').style.display=t==='DEMORADO'?'none':'block';
+  document.getElementById('sec-mot').style.display=t==='DEMORADO'?'block':'none';
 }
 
 /* Fotos: compresion y preview con dimension natural */
@@ -3148,7 +3150,7 @@ var _carIdx=0, _carItems=[];
 var _swipeX=0, _swipeY=0, _swipeLock=false;
 
 function mkWCard(r){
-  var cat=r.categoria||'PROFUGO';
+  var cat=ef(r)||'PROFUGO';
   var BL={PROFUGO:'PROFUGO',DETENIDO:'DETENIDO',DEMORADO:'DEMORADO'};
   var BC={PROFUGO:'#cc0e22',DETENIDO:'#059669',DEMORADO:'#e07000'};
 
