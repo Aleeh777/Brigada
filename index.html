@@ -1755,7 +1755,13 @@ function dbSave(){/* solo online — no guardar registros en localStorage */}
 function ftSave(){/* solo online — fotos en Supabase */}
 function accSave(){localStorage.setItem(KACC,JSON.stringify(ACC));}
 function ahora(){return new Date().toLocaleString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
-function ef(r){return r.tipo||'PROFUGO';}
+function ef(r){
+  var t=r.tipo||'PROFUGO';
+  // Compatibilidad con categorías viejas
+  if(t==='CAPTURA') return 'PROFUGO';
+  if(t==='SINPEDIDO') return 'DEMORADO';
+  return t;
+}
 function edad(fn){
   if(!fn||fn.length<8)return'--';
   var p=fn.split('/');if(p.length<3)return'--';
@@ -2521,22 +2527,33 @@ function _ejecutarGuardado(){
   if(sc2)sc2.style.display='none';
   var co=document.getElementById('carousel-outer');
   if(co)co.style.visibility='visible';
-  // Guardar en Supabase — intentar siempre
+  // Guardar datos SIN fotos (evitar HTTP 0 por tamaño)
   toast('Guardando...','av');
-  sbReq('PATCH','registros?id=eq.'+r.id, Object.assign({},datos,{
-    fotos:JSON.stringify(FT[r.id]||[]),
-    hist:JSON.stringify(r.hist)
-  }), {'Prefer':'return=minimal'}).then(function(res){
+  var payload=Object.assign({},datos,{hist:JSON.stringify(r.hist)});
+  // Solo incluir fotos si cambiaron (TMP no vacío)
+  if(d.tmp&&d.tmp.length) payload.fotos=JSON.stringify(FT[r.id]||[]);
+  sbReq('PATCH','registros?id=eq.'+r.id,payload,{'Prefer':'return=minimal'})
+  .then(function(res){
     if(res.ok){
-      SC=true;
-      window._EMD=null; EID=null;
+      SC=true; window._EMD=null; EID=null;
       cargarDesdeServidor();
       toast('Guardado OK','ok');
     } else {
-      toast('Error al guardar: HTTP '+res.status+' '+JSON.stringify(res.data),'err');
+      // Reintentar sin hist si falló
+      toast('Reintentando...','av');
+      sbReq('PATCH','registros?id=eq.'+r.id,datos,{'Prefer':'return=minimal'})
+      .then(function(res2){
+        if(res2.ok){
+          SC=true; window._EMD=null; EID=null;
+          cargarDesdeServidor();
+          toast('Guardado OK','ok');
+        } else {
+          toast('Error: HTTP '+res2.status,'err');
+        }
+      });
     }
   }).catch(function(e){
-    toast('Error de conexion: '+e,'err');
+    toast('Error red: '+e,'err');
   });
 }
 
@@ -3160,8 +3177,8 @@ var _swipeX=0, _swipeY=0, _swipeLock=false;
 
 function mkWCard(r){
   var cat=ef(r)||'PROFUGO';
-  var BL={PROFUGO:'PROFUGO',DETENIDO:'DETENIDO',DEMORADO:'DEMORADO',LIBERTAD:'CON LIBERTAD'};
-  var BC={PROFUGO:'#cc0e22',DETENIDO:'#059669',DEMORADO:'#e07000',LIBERTAD:'#3b82f6'};
+  var BL={PROFUGO:'PROFUGO',DETENIDO:'DETENIDO',DEMORADO:'DEMORADO',LIBERTAD:'CON LIBERTAD',CAPTURA:'PROFUGO',SINPEDIDO:'DEMORADO'};
+  var BC={PROFUGO:'#cc0e22',DETENIDO:'#059669',DEMORADO:'#e07000',LIBERTAD:'#3b82f6',CAPTURA:'#cc0e22',SINPEDIDO:'#e07000'};
 
   var fo=FT[r.id]||[];
   var nom=r.nombre?r.nombre.split(',')[0].substring(0,22):'SIN NOMBRE';
