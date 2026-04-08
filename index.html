@@ -2369,7 +2369,7 @@ function editarMovil(){
 function _confirmarGuardar(){}
 
 function _mostrarPantallaClave(){
-  if(_ADM_OK){ _ejecutarGuardado(); return; }
+  // Siempre pedir clave — no confiar en _ADM_OK para edición
   var sc=document.getElementById('scr-clave-guardar');
   if(!sc){
     sc=document.createElement('div');
