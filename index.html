@@ -3238,7 +3238,9 @@ function mkWCard(r){
       '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DNI</div>'+
           '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:#fff;">'+dni+'</div></div>'+
       '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DELITO</div>'+
-          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:'+BC[cat]+';text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+del2+'</div></div>'+
+          '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;color:'+BC[cat]+';text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+del2+'</div>'+
+          (r.division?'<div style="font-family:Share Tech Mono,monospace;font-size:9px;color:rgba(0,200,255,.55);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+r.division+'</div>':'')+
+          '</div>'+
       '<div><div style="font-family:Share Tech Mono,monospace;font-size:6px;color:rgba(0,200,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px;">DOMICILIO</div>'+
           '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:11px;color:#cde;white-space:normal;line-height:1.3;word-break:break-word;">'+dom+'</div></div>'+
     '</div>';
